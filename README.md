@@ -5,6 +5,69 @@ and the time shown by the event's timing equipment; the phone signs each entry
 on the spot, so any later change is detectable, and sends the signed records to
 a central database when there is a connection.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/authorize-device.png" alt="Setup screen showing the device's public key in eight groups, to give to the organizer"></td>
+    <td width="33%"><img src="docs/screenshots/entry.png" alt="Entry screen with the keypad and three saved entries: a time control, a stage finish to the tenth, and a stage time"></td>
+    <td width="33%"><img src="docs/screenshots/readback.png" alt="Readback before saving: car 12, 15:06:12,4, SS1 Finish, photocell printer"></td>
+  </tr>
+  <tr>
+    <td>Setup: the key the organizer authorizes</td>
+    <td>Entry: the keypad and the last entries</td>
+    <td>Readback: checked against the source before saving</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/offline.png" alt="Entry screen with no connection: one entry waiting to sync, safe on the phone"></td>
+    <td><img src="docs/screenshots/refused.png" alt="Entry screen after the server refused an entry for a point the device is not authorized for"></td>
+    <td><img src="docs/screenshots/night.png" alt="Entry screen in the dark scheme, with a time half typed"></td>
+  </tr>
+  <tr>
+    <td>No connection: entries wait on the phone</td>
+    <td>Refused: the server names the reason</td>
+    <td>Night stages: the dark scheme</td>
+  </tr>
+</table>
+
+All data shown is generated dummy data.
+
+## Architecture
+
+```mermaid
+flowchart TB
+  subgraph phone["Marshal's phone, offline"]
+    sw["Service worker<br/>keeps the app shell"] -. serves .-> ui["Entry screen<br/>/entry"]
+    ui --> entry["Entry service<br/>sign and save in one transaction"]
+    key[("Device key<br/>Ed25519, cannot be exported")] --> entry
+    entry --> local[("IndexedDB<br/>signed records and outbox")]
+    local --> sync["Sync loop<br/>retries with backoff"]
+  end
+
+  subgraph server["Next.js server"]
+    api["POST /api/sync<br/>GET /api/devices, /api/rallies, /api/health"] --> verify["Verify<br/>schema, signature, grants, chain"]
+  end
+
+  subgraph database["Local Postgres"]
+    dbserver["pnpm db:server<br/>PGlite over the Postgres protocol"] --> data[(".data/pglite")]
+  end
+
+  organizer["Organizer's command line<br/>pnpm db:seed, pnpm device:authorize"]
+
+  sync -- "signed records, when there is a connection" --> server
+  server -- "pg pool, DATABASE_URL" --> database
+  organizer -- DATABASE_URL --> database
+```
+
+Two rules hold throughout. An entry is signed and saved on the phone before
+anything touches the network; syncing only moves records that already exist.
+The server verifies each record (its format, its signature, what the device
+is allowed to enter, and its place in the device's chain) and stores the
+signed payload exactly as received, so it can be verified again at any time.
+Only `pnpm db:server` opens the database files; everything else connects
+through `DATABASE_URL`. The reasons behind these choices are in
+[docs/adr/](docs/adr/).
+
 ## Setup
 
 Requires [pnpm](https://pnpm.io) 12 (the version in `packageManager`). pnpm

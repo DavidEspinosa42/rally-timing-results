@@ -60,7 +60,8 @@ All three must pass.
 - `drizzle/`: generated SQL migrations and drizzle-kit snapshots (not
   checked by Biome).
 - `docs/`: `domain.md` (rally terms and regulations), `landscape.md`,
-  and `adr/` (architecture decision records).
+  `adr/` (architecture decision records), and `screenshots/` (shown in the
+  README).
 - Tests live next to the code as `*.test.ts`. `test/` holds only shared test
   helpers and checks of the test setup itself.
 
