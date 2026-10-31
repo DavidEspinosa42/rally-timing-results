@@ -25,7 +25,7 @@ the device (Ed25519 via WebCrypto) and later synced to a local Postgres
 - Migrations: `pnpm db:migrate` (with `db:server` running)
 - New migration after editing `src/lib/server/db/schema.ts`:
   `pnpm db:generate --name <change>`. Never edit files in `drizzle/` by hand.
-- Dev server: `pnpm dev`
+- Dev server: `pnpm dev` (needs `db:server` running)
 - Production build: `pnpm build`, then `pnpm start`
 - Type check: `pnpm typecheck` (runs `next typegen`, then `tsc --noEmit`)
 - Lint and format check: `pnpm lint` (Biome); auto-fix: `pnpm lint --write`

@@ -13,9 +13,11 @@ downloads and uses the Node.js version declared in `package.json`
 
 ```sh
 pnpm install
-pnpm dev                # http://localhost:3000
+pnpm dev                # http://localhost:3000, with db:server running
 pnpm build && pnpm start
 ```
+
+The app needs the local database: see [Database](#database).
 
 Checks, all of which must pass before a change is done:
 
@@ -46,6 +48,8 @@ pnpm db:migrate              # applies the migrations in drizzle/
   `drizzle/` are generated; do not edit them.
 - To start over, stop `db:server` and delete `.data/`.
 - Moving to a hosted or installed Postgres only changes `DATABASE_URL`.
+- `GET /api/health` answers `{"ok":true}` when the app can reach the
+  database, and 503 when it cannot.
 
 ## Documentation
 
