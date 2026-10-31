@@ -51,6 +51,31 @@ pnpm db:migrate              # applies the migrations in drizzle/
 - `GET /api/health` answers `{"ok":true}` when the app can reach the
   database, and 503 when it cannot.
 
+## Seed and device authorization
+
+There is no admin interface yet: rallies and devices are set up from the
+command line, with `db:server` running.
+
+```sh
+pnpm db:seed
+pnpm device:authorize <public-key> SS3 FINISH
+pnpm device:authorize <public-key> TC4A TC
+```
+
+- `pnpm db:seed` creates a dummy rally with generated data only. Its
+  structure follows a typical regional event: one leg over two days, four
+  sections, a non-scoring shakedown (`SS0`), seven special stages ending in a
+  Power Stage, coded time controls with allotted times, a flexi service with
+  a maximum, and 70 car numbers in 10 classes. Running it again does nothing.
+- `pnpm device:authorize` registers a device's raw Ed25519 public key
+  (64 hex characters) and grants it one point: `SS<n>` with
+  `START`, `FINISH`, `SPLIT` or `STOP`, or `TC<code>` with `TC`. Run it again
+  for each further point; one device can hold several, for example a regroup
+  control and the `FINISH` of the stage before it. With more than one rally,
+  add `--rally <id>`.
+- A device key belongs to one rally. A device needs a new key, and a new
+  authorization, for the next rally.
+
 ## Documentation
 
 - [ROADMAP.md](ROADMAP.md): planned work and how to start on it.

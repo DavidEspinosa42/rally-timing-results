@@ -12,7 +12,9 @@
     "test": "vitest run",
     "db:server": "node --conditions=react-server --import tsx scripts/db-server.mts",
     "db:migrate": "node --conditions=react-server --import tsx scripts/db-migrate.mts",
-    "db:generate": "node --conditions=react-server node_modules/drizzle-kit/bin.cjs generate"
+    "db:generate": "node --conditions=react-server node_modules/drizzle-kit/bin.cjs generate",
+    "db:seed": "node --conditions=react-server --import tsx scripts/db-seed.mts",
+    "device:authorize": "node --conditions=react-server --import tsx scripts/device-authorize.mts"
   },
   "dependencies": {
     "drizzle-orm": "0.45.4",

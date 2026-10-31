@@ -25,6 +25,9 @@ the device (Ed25519 via WebCrypto) and later synced to a local Postgres
 - Migrations: `pnpm db:migrate` (with `db:server` running)
 - New migration after editing `src/lib/server/db/schema.ts`:
   `pnpm db:generate --name <change>`. Never edit files in `drizzle/` by hand.
+- Seed dummy data: `pnpm db:seed` (with `db:server` running)
+- Authorize a device: `pnpm device:authorize <public-key> <SS<n>|TC<code>> <point>`;
+  repeat to grant more points. Add `--rally <id>` when there are several rallies.
 - Dev server: `pnpm dev` (needs `db:server` running)
 - Production build: `pnpm build`, then `pnpm start`
 - Type check: `pnpm typecheck` (runs `next typegen`, then `tsc --noEmit`)
