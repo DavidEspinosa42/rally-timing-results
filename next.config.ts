@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   typedRoutes: true,
+  // The entry screen is the only screen.
+  async redirects() {
+    return [{ source: "/", destination: "/entry", permanent: false }];
+  },
   turbopack: {
     rules: {
       "*.css": {

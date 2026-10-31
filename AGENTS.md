@@ -49,6 +49,8 @@ All three must pass.
 - `src/lib/api/`: zod schemas of API response bodies, shared by the route
   handlers and the client, which parses every response with them.
 - `src/app/api/`: route handlers. `src/app/sw.ts`: service worker.
+- `src/app/entry/`: the entry screen, a static shell around the client
+  components in `_components/`. `/` redirects there.
 - `scripts/`: command-line scripts run outside Next.
 - `drizzle/`: generated SQL migrations and drizzle-kit snapshots (not
   checked by Biome).

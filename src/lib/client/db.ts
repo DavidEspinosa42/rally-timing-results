@@ -1,6 +1,7 @@
 import "client-only";
 import { Dexie, type DexieOptions, type EntityTable } from "dexie";
 import { z } from "zod";
+import { deviceInfoSchema } from "@/lib/api/contract";
 
 const sha256Hex = z.string().regex(/^[0-9a-f]{64}$/);
 
@@ -35,11 +36,31 @@ export const storedRecordSchema = z.strictObject({
 });
 export type StoredRecord = z.infer<typeof storedRecordSchema>;
 
+/** The rally this phone was set up for: the one key it signs with. */
+export const settingSchema = z.strictObject({
+  name: z.literal("rallyId"),
+  value: z.uuid(),
+});
+export type Setting = z.infer<typeof settingSchema>;
+
+/**
+ * The device's grants as the server last described them, so the entry screen
+ * still works where there is no signal.
+ */
+export const cachedDeviceSchema = z.strictObject({
+  keyId: sha256Hex,
+  info: deviceInfoSchema,
+  fetchedAtMs: z.int().min(0),
+});
+export type CachedDevice = z.infer<typeof cachedDeviceSchema>;
+
 export const LOCAL_DB_NAME = "rally-timing";
 
 export class LocalDb extends Dexie {
   declare readonly keys: EntityTable<StoredKey, "rallyId">;
   declare readonly records: EntityTable<StoredRecord, "recordId">;
+  declare readonly settings: EntityTable<Setting, "name">;
+  declare readonly devices: EntityTable<CachedDevice, "keyId">;
 
   constructor(name: string = LOCAL_DB_NAME, options?: DexieOptions) {
     super(name, options);
@@ -47,6 +68,11 @@ export class LocalDb extends Dexie {
       keys: "rallyId, &keyId",
       // One chain per key: a seq can appear only once.
       records: "recordId, &[keyId+seq]",
+    });
+    // Adds tables only: existing keys and records are kept as they are.
+    this.version(2).stores({
+      settings: "name",
+      devices: "keyId",
     });
   }
 }

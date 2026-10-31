@@ -66,13 +66,37 @@ pnpm device:authorize <public-key> TC4A TC
   Power Stage, coded time controls with allotted times, a flexi service with
   a maximum, and 70 car numbers in 10 classes. Running it again does nothing.
 - `pnpm device:authorize` registers a device's raw Ed25519 public key
-  (64 hex characters) and grants it one point: `SS<n>` with
+  (the 64 hex characters its setup screen shows) and grants it one point: `SS<n>` with
   `START`, `FINISH`, `SPLIT` or `STOP`, or `TC<code>` with `TC`. Run it again
   for each further point; one device can hold several, for example a regroup
   control and the `FINISH` of the stage before it. With more than one rally,
   add `--rally <id>`.
 - A device key belongs to one rally. A device needs a new key, and a new
   authorization, for the next rally.
+
+## Installing to the Home Screen
+
+Install the app on each phone before setting it up, then open it from the
+Home Screen and set it up there:
+
+- iPhone and iPad (Safari): Share, then Add to Home Screen. The Home Screen
+  app keeps its own storage, separate from Safari's, so a key created in a
+  Safari tab would not exist in the installed app. Safari can also clear a
+  tab's storage after 7 days without a visit; Home Screen apps keep theirs.
+- Android (Chrome): the menu's Install app, or Add to Home screen.
+
+Then, on the phone:
+
+1. Open the app. With one rally on the server it is chosen automatically;
+   otherwise choose it.
+2. Tap Set up this device. This asks the browser to keep the app's storage
+   and creates the device's key. The screen shows "Storage: persistent" when
+   the browser agreed, or "May be cleared: install to Home Screen".
+3. Give the key shown to the organizer, who runs `pnpm device:authorize` for
+   each point the phone will enter, then tap Check authorization.
+
+Phones must reach the app over HTTPS (or `localhost`): the browser offers its
+signing API only in a secure context.
 
 ## API
 

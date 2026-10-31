@@ -1,26 +1,54 @@
 @import "tailwindcss";
 
+/*
+ * Colors come from rally control boards: the yellow of a time control board
+ * marks what is active and what saves; red is the stop board, for errors.
+ * Paper and ink are true white and black for contrast in direct sun. Night
+ * stages are real, so the dark scheme keeps the yellow and turns the paper
+ * black instead of dimming everything.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  color-scheme: light dark;
+  --paper: #ffffff;
+  --ink: #000000;
+  --graphite: #4a4f55;
+  --rule: #d5d8dc;
+  --alert: #d2122e;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --paper: #000000;
+    --ink: #ffffff;
+    --graphite: #b4bac1;
+    --rule: #3b4046;
+    --alert: #ff6b7d;
   }
 }
 
+@theme {
+  --color-board: #ffd100;
+  --font-sans: var(--font-atkinson), system-ui, sans-serif;
+  --font-mono: var(--font-atkinson-mono), ui-monospace, monospace;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-rule: var(--rule);
+  --color-alert: var(--alert);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
 }

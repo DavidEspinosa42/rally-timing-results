@@ -35,15 +35,5 @@
         "organizeImports": "on"
       }
     }
-  },
-  "overrides": [
-    {
-      "includes": ["**/*.svg"],
-      "linter": {
-        "rules": {
-          "a11y": { "noSvgWithoutTitle": "off" }
-        }
-      }
-    }
-  ]
+  }
 }
