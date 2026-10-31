@@ -2,18 +2,16 @@ import "server-only";
 import { desc, eq, inArray, sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { z } from "zod";
+import {
+  MAX_BATCH_RECORDS,
+  type Rejection,
+  type RejectReason,
+  type SyncResult,
+} from "@/lib/api/contract";
 import { parseCanonical } from "@/lib/record/canonical";
-import {
-  type ChainFailure,
-  type ChainHead,
-  verifyChain,
-} from "@/lib/record/chain";
+import { type ChainHead, verifyChain } from "@/lib/record/chain";
 import { fromHex } from "@/lib/record/hash";
-import {
-  type SignedRecord,
-  type VerifyFailure,
-  verifyRecord,
-} from "@/lib/record/sign";
+import { type SignedRecord, verifyRecord } from "@/lib/record/sign";
 import type { RecordV1 } from "@/lib/record/types";
 import {
   controls,
@@ -27,7 +25,6 @@ import {
 
 // Small batches keep one request from holding PGlite's single backend for
 // long. A v1 payload is about 700 characters; the caps leave ample room.
-export const MAX_BATCH_RECORDS = 500;
 const MAX_PAYLOAD_CHARS = 2_048;
 export const MAX_BODY_BYTES = 1_500_000;
 
@@ -40,32 +37,6 @@ const signedRecordSchema = z.strictObject({
 export const syncRequestSchema = z.strictObject({
   records: z.array(signedRecordSchema).min(1).max(MAX_BATCH_RECORDS),
 });
-
-export type RejectReason =
-  | VerifyFailure
-  | ChainFailure
-  | "unknown-device"
-  | "revoked"
-  | "wrong-rally"
-  | "not-authorized"
-  | "conflict";
-
-export type Rejection = {
-  index: number;
-  recordId: string | null;
-  reason: RejectReason;
-};
-
-/**
- * The batch is processed in order and stops at the first record that fails:
- * `accepted` records (the ones before it) are stored, including any that
- * were already stored. The device keeps the rest and may resend them.
- */
-export type SyncResult = {
-  accepted: number;
-  head: ChainHead;
-  rejected: Rejection | null;
-};
 
 type Verified = { record: RecordV1; signed: SignedRecord; hash: string };
 type Db = NodePgDatabase;

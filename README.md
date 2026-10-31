@@ -95,6 +95,14 @@ Then, on the phone:
 3. Give the key shown to the organizer, who runs `pnpm device:authorize` for
    each point the phone will enter, then tap Check authorization.
 
+Each entry is signed and saved on the phone first, and sent to the server
+whenever there is a connection: at once after saving, when the connection
+comes back, when the app is reopened, and every 30 seconds. The line at the
+top of the screen shows how many entries are waiting. A failed request
+counts as no connection, whatever the phone's network icon shows, and
+retries back off (2 seconds, doubling up to 5 minutes) so many phones
+regaining signal at once do not retry in step.
+
 Phones must reach the app over HTTPS (or `localhost`): the browser offers its
 signing API only in a secure context.
 

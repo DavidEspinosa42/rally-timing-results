@@ -1,6 +1,7 @@
 import { count, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { POST } from "@/app/api/sync/route";
+import { MAX_BATCH_RECORDS, syncResultSchema } from "@/lib/api/contract";
 import { type ChainHead, nextPosition } from "@/lib/record/chain";
 import { toHex } from "@/lib/record/hash";
 import {
@@ -21,7 +22,7 @@ import {
   sections,
   stages,
 } from "@/lib/server/db/schema";
-import { MAX_BATCH_RECORDS, storeBatch } from "@/lib/server/verify";
+import { storeBatch } from "@/lib/server/verify";
 import { startTestDatabase } from "../../../test/db";
 import { IDS, timeRecord } from "../../../test/fixtures";
 
@@ -353,7 +354,7 @@ describe("POST /api/sync", () => {
     );
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
-    expect(await response.json()).toMatchObject({
+    expect(syncResultSchema.parse(await response.json())).toMatchObject({
       accepted: 2,
       rejected: null,
     });

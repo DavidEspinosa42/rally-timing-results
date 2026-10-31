@@ -121,7 +121,7 @@ describe("fetchDevice", () => {
 });
 
 describe("local database upgrade", () => {
-  it("keeps a key written by the first schema version", async () => {
+  it("keeps a key written by the first schema version through every upgrade", async () => {
     // A key made elsewhere, then stored through the version 1 schema alone.
     const key = await getOrCreateDeviceKey(open(), IDS.rally);
     const profile = newBrowserProfile();
@@ -138,7 +138,8 @@ describe("local database upgrade", () => {
 
     const upgraded = open(profile);
     expect((await upgraded.keys.get(IDS.rally))?.keyId).toBe(key.keyId);
-    expect(upgraded.verno).toBe(2);
+    expect(upgraded.verno).toBe(3);
     expect(await upgraded.settings.count()).toBe(0);
+    expect(await upgraded.syncState.count()).toBe(0);
   });
 });

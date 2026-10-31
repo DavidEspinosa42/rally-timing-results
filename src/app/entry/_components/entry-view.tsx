@@ -18,6 +18,7 @@ import {
   SOURCE_NAMES,
 } from "@/lib/client/labels";
 import type { Persistence } from "@/lib/client/support";
+import type { DrainOutcome } from "@/lib/client/sync";
 import {
   formatTime,
   maskTime,
@@ -40,6 +41,7 @@ import { Keypad } from "./keypad";
 import { Readback } from "./readback";
 import { RecentEntries, type RecentRow } from "./recent-entries";
 import { StorageBadge } from "./storage-badge";
+import { SyncIndicator } from "./sync-indicator";
 import { useWakeLock } from "./use-wake-lock";
 
 type Step = "car" | "time" | "readback";
@@ -102,11 +104,16 @@ export function EntryView({
   deviceKey,
   device,
   persistence,
+  syncStatus,
+  onSaved,
 }: {
   db: LocalDb;
   deviceKey: DeviceKey;
   device: DeviceInfo;
   persistence: Persistence;
+  syncStatus: DrainOutcome | null;
+  /** Called after each entry is saved, so it can be sent at once. */
+  onSaved: () => void;
 }) {
   const { grants } = device;
   const [grant, setGrant] = useState<Grant | undefined>(grants[0]);
@@ -238,6 +245,7 @@ export function EntryView({
       setCar("");
       setDigits("");
       setStep("car");
+      onSaved();
       await refreshRecent();
     } catch (cause) {
       setError(
@@ -265,6 +273,9 @@ export function EntryView({
 
   return (
     <>
+      <div className="mb-4">
+        <SyncIndicator status={syncStatus} />
+      </div>
       <div className="grid gap-3">
         <Select
           label="Entering"

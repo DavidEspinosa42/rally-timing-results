@@ -50,3 +50,55 @@ export const deviceInfoSchema = z.strictObject({
   grants: z.array(grantSchema),
 });
 export type DeviceInfo = z.infer<typeof deviceInfoSchema>;
+
+/** The most records one POST /api/sync may carry. */
+export const MAX_BATCH_RECORDS = 500;
+
+/** Why the server stopped storing a batch at a record. */
+export const REJECT_REASONS = [
+  // The record itself (signature and format).
+  "not-canonical",
+  "invalid-record",
+  "key-mismatch",
+  "bad-signature",
+  "hash-mismatch",
+  // Its place in the device's chain.
+  "wrong-device",
+  "gap",
+  "out-of-order",
+  "broken-link",
+  // The device and what it may enter.
+  "unknown-device",
+  "revoked",
+  "wrong-rally",
+  "not-authorized",
+  // A stored record id that came back with other content.
+  "conflict",
+] as const;
+export type RejectReason = (typeof REJECT_REASONS)[number];
+
+export const rejectionSchema = z.strictObject({
+  index: z.int().min(0),
+  // As the record claimed it; null when the payload could not be read.
+  recordId: z.string().nullable(),
+  reason: z.enum(REJECT_REASONS),
+});
+export type Rejection = z.infer<typeof rejectionSchema>;
+
+/**
+ * POST /api/sync. The batch is processed in order and stops at the first
+ * record that fails: `accepted` records (the ones before it) are stored,
+ * including any that were already stored. `head` is the last record the
+ * server holds for the device, whatever this batch contained.
+ */
+export const syncResultSchema = z.strictObject({
+  accepted: z.int().min(0),
+  head: z
+    .strictObject({
+      seq: z.int().min(0),
+      hash: z.string().regex(/^[0-9a-f]{64}$/),
+    })
+    .nullable(),
+  rejected: rejectionSchema.nullable(),
+});
+export type SyncResult = z.infer<typeof syncResultSchema>;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { DeviceInfo } from "@/lib/api/contract";
 import { type LocalDb, localDb } from "@/lib/client/db";
 import { type DeviceKey, getDeviceKey } from "@/lib/client/device-key";
@@ -16,6 +16,12 @@ import {
   type Persistence,
   storagePersistence,
 } from "@/lib/client/support";
+import {
+  type DrainOutcome,
+  drain,
+  type SyncLoop,
+  startSync,
+} from "@/lib/client/sync";
 import { EntryView } from "./entry-view";
 import { SetupView } from "./setup-view";
 
@@ -101,6 +107,24 @@ export function EntryApp() {
     };
   }, [entryKey, entryDb]);
 
+  // The outbox drains while the entry screen is open, for an authorized,
+  // unrevoked device. Entries are saved before this, so it can fail freely.
+  const [syncStatus, setSyncStatus] = useState<DrainOutcome | null>(null);
+  const syncLoop = useRef<SyncLoop | null>(null);
+  const revoked = state.view === "entry" && state.device.revoked;
+  useEffect(() => {
+    if (entryKey === null || entryDb === null || revoked) return;
+    const loop = startSync({
+      run: () => drain(entryDb, entryKey),
+      onStatus: setSyncStatus,
+    });
+    syncLoop.current = loop;
+    return () => {
+      loop.stop();
+      syncLoop.current = null;
+    };
+  }, [entryKey, entryDb, revoked]);
+
   const onRallyChosen = useCallback(
     (rallyId: string) => {
       if (state.view !== "setup") return;
@@ -171,6 +195,8 @@ export function EntryApp() {
       deviceKey={state.deviceKey}
       device={state.device}
       persistence={persistence}
+      syncStatus={syncStatus}
+      onSaved={() => syncLoop.current?.kick()}
     />
   );
 }

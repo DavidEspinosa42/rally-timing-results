@@ -1,7 +1,7 @@
 import "client-only";
 import { Dexie, type DexieOptions, type EntityTable } from "dexie";
 import { z } from "zod";
-import { deviceInfoSchema } from "@/lib/api/contract";
+import { deviceInfoSchema, REJECT_REASONS } from "@/lib/api/contract";
 
 const sha256Hex = z.string().regex(/^[0-9a-f]{64}$/);
 
@@ -54,6 +54,25 @@ export const cachedDeviceSchema = z.strictObject({
 });
 export type CachedDevice = z.infer<typeof cachedDeviceSchema>;
 
+/**
+ * How far this key's chain has reached the server. Records with a higher seq
+ * are the outbox; the records themselves are never marked or changed.
+ */
+export const syncStateSchema = z.strictObject({
+  keyId: sha256Hex,
+  // The server's last record for this key; -1 before any.
+  syncedSeq: z.int().min(-1),
+  lastSuccessAtMs: z.int().min(0).nullable(),
+  // Why the server stopped at the next record, if it did.
+  problem: z
+    .strictObject({
+      reason: z.enum([...REJECT_REASONS, "server-chain-differs"]),
+      recordId: z.string().nullable(),
+    })
+    .nullable(),
+});
+export type SyncState = z.infer<typeof syncStateSchema>;
+
 export const LOCAL_DB_NAME = "rally-timing";
 
 export class LocalDb extends Dexie {
@@ -61,6 +80,7 @@ export class LocalDb extends Dexie {
   declare readonly records: EntityTable<StoredRecord, "recordId">;
   declare readonly settings: EntityTable<Setting, "name">;
   declare readonly devices: EntityTable<CachedDevice, "keyId">;
+  declare readonly syncState: EntityTable<SyncState, "keyId">;
 
   constructor(name: string = LOCAL_DB_NAME, options?: DexieOptions) {
     super(name, options);
@@ -74,6 +94,7 @@ export class LocalDb extends Dexie {
       settings: "name",
       devices: "keyId",
     });
+    this.version(3).stores({ syncState: "keyId" });
   }
 }
 
