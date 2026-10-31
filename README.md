@@ -25,6 +25,17 @@ pnpm lint               # Biome; auto-fix with pnpm lint --write
 pnpm test               # Vitest; one file: pnpm test path/to/file.test.ts
 ```
 
+## Documentation
+
+- [ROADMAP.md](ROADMAP.md): planned work and how to start on it.
+- [AGENTS.md](AGENTS.md): instructions for coding agents: commands, layout,
+  and the integrity rules every change must keep.
+- [docs/domain.md](docs/domain.md): rally terms, the regulations the app
+  relies on, and the reference event.
+- [docs/landscape.md](docs/landscape.md): existing tools and practices, and
+  where this app fits.
+- [docs/adr/](docs/adr/): design decisions and why they were made.
+
 ## Data policy
 
 This application strictly processes anonymized car numbers and timestamps. It
