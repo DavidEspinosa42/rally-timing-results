@@ -46,6 +46,8 @@ All three must pass.
   Every module starts with `import "client-only"`.
 - `src/lib/server/`: server only (Postgres client, Drizzle schema, verification).
   Every module starts with `import "server-only"`.
+- `src/lib/api/`: zod schemas of API response bodies, shared by the route
+  handlers and the client, which parses every response with them.
 - `src/app/api/`: route handlers. `src/app/sw.ts`: service worker.
 - `scripts/`: command-line scripts run outside Next.
 - `drizzle/`: generated SQL migrations and drizzle-kit snapshots (not

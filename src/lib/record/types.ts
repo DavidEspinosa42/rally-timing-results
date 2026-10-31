@@ -63,6 +63,20 @@ export const PENALTY_REASONS = [
 ] as const;
 export type PenaltyReason = (typeof PENALTY_REASONS)[number];
 
+// What a time control is (controls.kind in the database). Not a field of
+// signed records: a record at a control always has the TC point.
+export const CONTROL_KINDS = [
+  "TC",
+  "SERVICE_IN",
+  "SERVICE_OUT",
+  "PARC_FERME_IN",
+  "PARC_FERME_OUT",
+  "REGROUP_IN",
+  "REGROUP_OUT",
+  "TECH_ZONE",
+] as const;
+export type ControlKind = (typeof CONTROL_KINDS)[number];
+
 export const MIN_CAR_NUMBER = 1;
 export const MAX_CAR_NUMBER = 999;
 export const DAY_MS = 86_400_000;

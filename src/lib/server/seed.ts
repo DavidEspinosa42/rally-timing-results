@@ -1,8 +1,8 @@
 import "server-only";
 import { eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { ControlKind } from "@/lib/record/types";
 import {
-  type CONTROL_KINDS,
   classes,
   controls,
   entries,
@@ -22,8 +22,6 @@ export const DUMMY_RALLY_ID = "5eed0000-0000-4000-8000-000000000001";
 
 const HOUR_MS = 3_600_000;
 const MINUTE_MS = 60_000;
-
-type ControlKind = (typeof CONTROL_KINDS)[number];
 
 type ControlPlan = {
   type: "control";

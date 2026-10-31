@@ -48,8 +48,6 @@ pnpm db:migrate              # applies the migrations in drizzle/
   `drizzle/` are generated; do not edit them.
 - To start over, stop `db:server` and delete `.data/`.
 - Moving to a hosted or installed Postgres only changes `DATABASE_URL`.
-- `GET /api/health` answers `{"ok":true}` when the app can reach the
-  database, and 503 when it cannot.
 
 ## Seed and device authorization
 
@@ -75,6 +73,18 @@ pnpm device:authorize <public-key> TC4A TC
   add `--rally <id>`.
 - A device key belongs to one rally. A device needs a new key, and a new
   authorization, for the next rally.
+
+## API
+
+Plain JSON over HTTP, never cached. Response bodies are defined by the zod
+schemas in `src/lib/api/contract.ts`.
+
+| Endpoint                   | Answers                                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/health`          | `{"ok":true}` when the app can reach the database; 503 when it cannot                                               |
+| `GET /api/rallies`         | Every rally, as `{ id, name }`                                                                                      |
+| `GET /api/devices/<keyId>` | The device's rally, whether it is revoked, and its grants in itinerary order; 404 until it is authorized            |
+| `POST /api/sync`           | Takes up to 500 signed records from one device and stores them in order up to the first one that fails verification |
 
 ## Documentation
 

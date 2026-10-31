@@ -18,6 +18,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import {
+  CONTROL_KINDS,
   PENALTY_REASONS,
   POINTS,
   PRECISIONS,
@@ -26,18 +27,6 @@ import {
   SOURCES,
   STATUSES,
 } from "../../record/types";
-
-// The meaning of a time control. Every control takes the TC point.
-export const CONTROL_KINDS = [
-  "TC",
-  "SERVICE_IN",
-  "SERVICE_OUT",
-  "PARC_FERME_IN",
-  "PARC_FERME_OUT",
-  "REGROUP_IN",
-  "REGROUP_OUT",
-  "TECH_ZONE",
-] as const;
 
 // Enums come from the record types, so the database and the signed record
 // schema cannot drift apart.
