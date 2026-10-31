@@ -19,7 +19,12 @@ the device (Ed25519 via WebCrypto) and later synced to a local Postgres
 
 ## Commands
 
-- Install: `pnpm install`
+- Install: `pnpm install`, then copy `.env.example` to `.env.local`
+- Database: `pnpm db:server`, in its own terminal. It is the only process that
+  opens `.data/pglite`; everything else connects through `DATABASE_URL`.
+- Migrations: `pnpm db:migrate` (with `db:server` running)
+- New migration after editing `src/lib/server/db/schema.ts`:
+  `pnpm db:generate --name <change>`. Never edit files in `drizzle/` by hand.
 - Dev server: `pnpm dev`
 - Production build: `pnpm build`, then `pnpm start`
 - Type check: `pnpm typecheck` (runs `next typegen`, then `tsc --noEmit`)
@@ -40,6 +45,8 @@ All three must pass.
   Every module starts with `import "server-only"`.
 - `src/app/api/`: route handlers. `src/app/sw.ts`: service worker.
 - `scripts/`: command-line scripts run outside Next.
+- `drizzle/`: generated SQL migrations and drizzle-kit snapshots (not
+  checked by Biome).
 - `docs/`: `domain.md` (rally terms and regulations), `landscape.md`,
   and `adr/` (architecture decision records).
 - Tests live next to the code as `*.test.ts`. `test/` holds only shared test
