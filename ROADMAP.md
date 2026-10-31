@@ -77,6 +77,13 @@ interface, results computation, penalty logic, or export yet.
 | Power Stage classification                                                                                                                                                                                                                                                   | 2     |
 | Live public results when there is a connection                                                                                                                                                                                                                               | 3     |
 
+## Safety (10 h)
+
+| Item                                                                                                                                                                                                                                                                                                                | Hours |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| Overdue-car alert: a car with a START on a special stage and no FINISH after the stage's expected time plus a margin (per-rally settings) is flagged on the organizer's screen, since it may have had an accident. Uses the START and FINISH records already synced; cars not yet seen at the START are not flagged | 6     |
+| Stage stop ("red flag") broadcast: the organizer marks a stage as stopped, and every device holding a grant on it shows a banner on its next sync. The stop is a signed organizer record, and feeds the notional times for an interrupted stage                                                                     | 4     |
+
 ## Entry quality and field use (19 h)
 
 | Item                                                                                                         | Hours |
@@ -88,13 +95,17 @@ interface, results computation, penalty logic, or export yet.
 | Field UX: fast sequential entry from a paper sheet, big touch targets, high contrast, one-handed use         | 3     |
 | Spanish localization                                                                                         | 3     |
 
-## Integrity and verification (11 h)
+## Integrity and verification (31 h)
 
-| Item                                                                                                                                   | Hours |
-| -------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| A public `/verify/[id]` page, a signed JSON export, and an independent verification CLI                                                | 4     |
-| Key lifecycle: rotation through a hand-over record signed by the previous key (no new authorization needed), a lost device, revocation | 4     |
-| Auditing the device clock: `GET /api/time`, the offset of `enteredAtMs`, a warning                                                     | 3     |
+| Item                                                                                                                                                                                                                                                                                                                   | Hours |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| A public `/verify/[id]` page, a signed JSON export, and an independent verification CLI                                                                                                                                                                                                                                | 4     |
+| Key lifecycle: rotation through a hand-over record signed by the previous key (no new authorization needed), a lost device, revocation                                                                                                                                                                                 | 4     |
+| Auditing the device clock: `GET /api/time`, the offset of `enteredAtMs`, a warning                                                                                                                                                                                                                                     | 3     |
+| Phone-to-phone relay by QR code: where a stage has no signal at all, a passing official's phone scans an animated QR code from the marshal's phone and carries its signed records out to the server. Records are signed, so any device can carry them and none can change them; the server's chain check still applies | 8     |
+| Signed chain checkpoints: at the end of each section the organizer publishes a signed list of every device's last `seq` and hash, so dropping a device's newest records becomes detectable (the limit described in `docs/adr/0002-no-blockchain.md`)                                                                   | 4     |
+| Digital time-card receipt: after the readback, the marshal's phone shows a QR code the crew can scan, holding their car number, time and control, signed by the device. The digital version of the paper time card crews carry; no personal data                                                                       | 5     |
+| Protest evidence bundle: for one car at one control, export the signed records, their place in each device's chain, and a verification report the stewards can check independently, for example with the verification CLI                                                                                              | 3     |
 
 ## Offline and sync (11 h)
 
@@ -130,7 +141,7 @@ interface, results computation, penalty logic, or export yet.
 | Threat model: what the signature proves (this authorized device entered this value at this point in its chain, and nobody changed it since) and what it does not (that the value read from the timing equipment was right, or that the device clock was) | 2     |
 | Keep `docs/landscape.md` current and add a source link for each product                                                                                                                                                                                  | 1     |
 
-**Total: ~121 h**
+**Total: ~151 h**
 
 Out of scope under the data policy: the administrative side of a rally
 (licenses, insurance, registration).

@@ -5,6 +5,11 @@ and the time shown by the event's timing equipment; the phone signs each entry
 on the spot, so any later change is detectable, and sends the signed records to
 a central database when there is a connection.
 
+It is for rally clubs and organizers who already time their events with
+photocells, clocks or stopwatches, and for the marshals at each stage and
+time control who copy those readings. It replaces the paper time cards and
+check sheets between the controls and the people who compute the results.
+
 ## Screenshots
 
 <table>
@@ -67,6 +72,20 @@ signed payload exactly as received, so it can be verified again at any time.
 Only `pnpm db:server` opens the database files; everything else connects
 through `DATABASE_URL`. The reasons behind these choices are in
 [docs/adr/](docs/adr/).
+
+## Built with
+
+- [Next.js](https://nextjs.org) 16 (App Router, Turbopack) with React 19,
+  TypeScript 7 and Tailwind CSS 4, for the entry screen and the API.
+- On the phone: [Dexie](https://dexie.org) over IndexedDB for the records
+  and the outbox, WebCrypto Ed25519 for signing, and
+  [Serwist](https://serwist.pages.dev) for the offline service worker.
+- On the server: [PGlite](https://pglite.dev) (Postgres in WebAssembly) behind
+  a small socket server, [Drizzle ORM](https://orm.drizzle.team) with `pg`,
+  and [zod](https://zod.dev) to check every request and record.
+- Tooling: pnpm 12 on Node.js 26, [Vitest](https://vitest.dev) with
+  fast-check and fake-indexeddb, and [Biome](https://biomejs.dev) for lint and
+  format.
 
 ## Setup
 

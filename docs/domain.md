@@ -64,9 +64,9 @@ takes these values as per-rally settings, with the values here as defaults.
   classification: stage time plus that stage's penalties, and the crew must
   check in at the sector's closing time control.
   Shakedown does not count.
-- **Restart example:** in one rally's published results, car 8 on SS1 shows
-  12.06,9: the best RC2 time (7.06,9) plus 5:00 for a missed stage after
-  retiring.
+- **Restart example** (made-up figures): if the best RC2 time on a special
+  stage is 7.06,9, an RC2 crew that missed that stage after retiring is given
+  12.06,9, which is 7.06,9 plus 5:00.
 - **Argentine notation:** `m.ss,t` and `h.mm.ss,t` with a decimal comma, a
   difference to first and to the previous car, ties shown as `51=` and broken
   by the best time on the first special stage.
