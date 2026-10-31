@@ -26,12 +26,23 @@ Roadmap work starts from the finished initial version, which provides:
 - A local Postgres (PGlite) served by `pnpm db:server`, with a Drizzle schema
   for the full rally structure (legs, sections, special stages, time controls,
   classes, entries), devices, grants, and records.
-- `GET /api/health` and `POST /api/sync`, which verifies signature, device
-  authorization, and chain before storing a record.
-- Command-line scripts to seed a dummy rally and to authorize a device.
-- An installable entry screen that works offline: device setup with persistent
-  storage, guided entry with readback, wake lock, an outbox that syncs when
-  there is a connection, and a service worker.
+- `POST /api/sync`, which verifies signature, device authorization, and chain
+  and stores a batch up to the first record that fails
+  (`docs/adr/0008-sync-stores-the-longest-valid-prefix.md`); `GET /api/rallies`
+  and `GET /api/devices/<keyId>` for device setup; and `GET /api/health`.
+  Response bodies are zod schemas in `src/lib/api/contract.ts`.
+- Command-line scripts to seed a dummy rally and to authorize a device by its
+  public key.
+- An installable entry screen that works offline: choosing the rally, device
+  setup with persistent storage, guided entry (car, then time, then a
+  readback) with times of day typed in full
+  (`docs/adr/0009-times-of-day-are-typed-in-full.md`), wake lock, and a
+  service worker.
+- An outbox that syncs when there is a connection, with backoff, and a status
+  line that shows waiting entries and any record the server refused. A
+  refused record stays on the phone until its cause is fixed.
+- Continuous integration that runs typecheck, lint, tests, and the
+  production build on every push.
 
 Rallies and devices are set up from the command line; there is no admin
 interface, results computation, penalty logic, or export yet.

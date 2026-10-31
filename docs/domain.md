@@ -19,6 +19,10 @@ takes these values as per-rally settings, with the values here as defaults.
 - **The app never measures time.** Marshals type the reading of the event's
   own timing equipment. The main risk is transcription error, so checks on
   what was typed matter more than clock precision.
+- **Typing times:** a time of day is typed with every digit, both hour digits
+  included (0905 for 09:05), so a half-typed time can never be saved. A stage
+  time keeps variable-width minutes (7.06,9 or 12.06,9). Every entry is read
+  back in full before it is signed.
 - **Reference event:** a typical regional rally from 2026. 1 leg over two days (section 1
   on Saturday, section 3 on Sunday), 4 sections, 7 special stages, time
   controls coded CH0, 1, 1A…1H, 2, 3, 4, 4A…4D. 71 entries, 47 classified, 10
