@@ -31,7 +31,8 @@ export function SyncIndicator({ status }: { status: DrainOutcome | null }) {
             `The server refused an entry (${problem.reason}). Tell the organizer.`}
         </p>
         <p className="text-graphite">
-          {entries(pending)} waiting on this phone. They are not lost.
+          {entries(pending)} waiting on this phone.{" "}
+          {pending === 1 ? "It is not lost." : "They are not lost."}
         </p>
       </div>
     );
@@ -42,8 +43,8 @@ export function SyncIndicator({ status }: { status: DrainOutcome | null }) {
   if (online === false) {
     return (
       <p className="min-h-6 border-l-4 border-board pl-3 font-semibold">
-        {entries(pending)} waiting to sync. No connection; they are safe on this
-        phone.
+        {entries(pending)} waiting to sync. No connection;{" "}
+        {pending === 1 ? "it is" : "they are"} safe on this phone.
       </p>
     );
   }

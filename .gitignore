@@ -43,3 +43,7 @@ next-env.d.ts
 
 # local database (PGlite data directory)
 /.data/
+
+# service worker, built by `serwist build`
+/public/sw.js
+/public/sw.js.map

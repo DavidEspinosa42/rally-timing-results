@@ -28,9 +28,12 @@ the device (Ed25519 via WebCrypto) and later synced to a local Postgres
 - Seed dummy data: `pnpm db:seed` (with `db:server` running)
 - Authorize a device: `pnpm device:authorize <public-key> <SS<n>|TC<code>> <point>`;
   repeat to grant more points. Add `--rally <id>` when there are several rallies.
-- Dev server: `pnpm dev` (needs `db:server` running)
-- Production build: `pnpm build`, then `pnpm start`
-- Type check: `pnpm typecheck` (runs `next typegen`, then `tsc --noEmit`)
+- Dev server: `pnpm dev` (needs `db:server` running; service worker is disabled in dev)
+- Production build: `pnpm build` (runs `next build && serwist build`), then
+  `pnpm start` (port 3100, so the production service worker never controls the
+  dev origin). Test offline behavior only on this build, never in dev.
+- Type check: `pnpm typecheck` (runs `next typegen`, then `tsc --noEmit` for the
+  app and for the service worker's `tsconfig.sw.json`)
 - Lint and format check: `pnpm lint` (Biome); auto-fix: `pnpm lint --write`
 - Tests: `pnpm test`; one file: `pnpm test path/to/file.test.ts`
 
@@ -48,7 +51,9 @@ All three must pass.
   Every module starts with `import "server-only"`.
 - `src/lib/api/`: zod schemas of API response bodies, shared by the route
   handlers and the client, which parses every response with them.
-- `src/app/api/`: route handlers. `src/app/sw.ts`: service worker.
+- `src/app/api/`: route handlers. `src/app/sw.ts`: service worker, built by
+  `serwist build` (`serwist.config.mjs`) into the git-ignored `public/sw.js`
+  and type-checked by `tsconfig.sw.json`, not `tsconfig.json`.
 - `src/app/entry/`: the entry screen, a static shell around the client
   components in `_components/`. `/` redirects there.
 - `scripts/`: command-line scripts run outside Next.

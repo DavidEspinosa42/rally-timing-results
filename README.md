@@ -14,7 +14,7 @@ downloads and uses the Node.js version declared in `package.json`
 ```sh
 pnpm install
 pnpm dev                # http://localhost:3000, with db:server running
-pnpm build && pnpm start
+pnpm build && pnpm start   # production build, on http://localhost:3100
 ```
 
 The app needs the local database: see [Database](#database).
@@ -105,6 +105,30 @@ regaining signal at once do not retry in step.
 
 Phones must reach the app over HTTPS (or `localhost`): the browser offers its
 signing API only in a secure context.
+
+## Testing offline
+
+The service worker exists only in the production build, so test offline
+behavior there, never with `pnpm dev`:
+
+```sh
+pnpm db:server               # in its own terminal
+pnpm build && pnpm start     # http://localhost:3100
+```
+
+1. Open http://localhost:3100/entry, set up the device and enter a time. The
+   service worker is now installed and holds the entry screen.
+2. Stop `pnpm start` (leave `db:server` running) and reload the page. It
+   still opens, and entries are signed and saved; the top line counts them
+   as waiting. Any page the worker does not hold shows "No connection".
+3. Start `pnpm start` again. Within a few seconds the waiting entries reach
+   the server and the line reads "All entries synced".
+
+`pnpm start` uses port 3100 so the production worker never takes control of
+the dev server's origin (port 3000). The worker never caches `/api/`, so a
+stopped server shows as unreachable instead of answering from a cache. A new
+build takes over only once every tab of the app is closed, never in the
+middle of an entry.
 
 ## API
 

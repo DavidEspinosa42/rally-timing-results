@@ -4,6 +4,7 @@ import {
   Atkinson_Hyperlegible_Next,
 } from "next/font/google";
 import "./globals.css";
+import { ServiceWorkerRegistration } from "./sw-register";
 
 // Atkinson Hyperlegible was drawn so that 1 and 7, 0 and 8, 6 and 9 cannot be
 // mistaken for each other, which is what matters when copying times. The
@@ -45,7 +46,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${atkinson.variable} ${atkinsonMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        <ServiceWorkerRegistration />
+      </body>
     </html>
   );
 }

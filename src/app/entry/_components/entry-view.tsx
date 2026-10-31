@@ -334,7 +334,7 @@ export function EntryView({
           onClick={() => setStep("car")}
           className={field(step === "car")}
         >
-          <span className="text-lg">Car</span>
+          <span className="text-2xl font-semibold">Car</span>
           <span className="text-5xl font-bold">{car === "" ? "–" : car}</span>
         </button>
         <button
@@ -342,7 +342,7 @@ export function EntryView({
           onClick={() => carValid && setStep("time")}
           className={field(step === "time")}
         >
-          <span className="text-lg">
+          <span className="text-2xl font-semibold">
             {mode === "elapsed" ? "Stage time" : "Time"}
           </span>
           <span className="font-mono text-4xl font-semibold">
