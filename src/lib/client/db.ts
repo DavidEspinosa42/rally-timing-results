@@ -2,6 +2,7 @@ import "client-only";
 import { Dexie, type DexieOptions, type EntityTable } from "dexie";
 import { z } from "zod";
 import { deviceInfoSchema, REJECT_REASONS } from "@/lib/api/contract";
+import { PRECISIONS, SOURCE_ROLES, SOURCES } from "@/lib/record/types";
 
 const sha256Hex = z.string().regex(/^[0-9a-f]{64}$/);
 
@@ -37,10 +38,34 @@ export const storedRecordSchema = z.strictObject({
 export type StoredRecord = z.infer<typeof storedRecordSchema>;
 
 /** The rally this phone was set up for: the one key it signs with. */
-export const settingSchema = z.strictObject({
+export const rallySettingSchema = z.strictObject({
   name: z.literal("rallyId"),
   value: z.uuid(),
 });
+
+/**
+ * What the marshal last chose on the entry screen, so reopening the app does
+ * not reset it. Tied to a key, so another rally starts from the defaults.
+ */
+export const entryPreferencesSchema = z.strictObject({
+  keyId: sha256Hex,
+  // A grantKey(): the target's id and the point.
+  grant: z.string(),
+  source: z.enum(SOURCES),
+  sourceRole: z.enum(SOURCE_ROLES),
+  mode: z.enum(["time-of-day", "elapsed"]),
+  precision: z.enum(PRECISIONS),
+});
+
+export const preferencesSettingSchema = z.strictObject({
+  name: z.literal("entryPreferences"),
+  value: entryPreferencesSchema,
+});
+
+export const settingSchema = z.discriminatedUnion("name", [
+  rallySettingSchema,
+  preferencesSettingSchema,
+]);
 export type Setting = z.infer<typeof settingSchema>;
 
 /**

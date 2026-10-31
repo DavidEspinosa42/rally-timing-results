@@ -10,13 +10,18 @@ import {
   latestEntries,
 } from "@/lib/client/entry";
 import {
-  defaultSource,
   grantKey,
   grantLabel,
   grantOf,
   ROLE_NAMES,
   SOURCE_NAMES,
 } from "@/lib/client/labels";
+import {
+  defaultChoice,
+  type EntryPreferences,
+  initialChoice,
+  saveEntryPreferences,
+} from "@/lib/client/preferences";
 import type { Persistence } from "@/lib/client/support";
 import type { DrainOutcome } from "@/lib/client/sync";
 import {
@@ -25,8 +30,8 @@ import {
   maxDigits,
   precisionsFor,
   type TimeMode,
+  typingHint,
 } from "@/lib/client/time-input";
-import { defaultPrecision } from "@/lib/record/time";
 import {
   MAX_CAR_NUMBER,
   MIN_CAR_NUMBER,
@@ -105,6 +110,7 @@ export function EntryView({
   device,
   persistence,
   syncStatus,
+  preferences,
   onSaved,
 }: {
   db: LocalDb;
@@ -112,18 +118,19 @@ export function EntryView({
   device: DeviceInfo;
   persistence: Persistence;
   syncStatus: DrainOutcome | null;
+  /** The marshal's last choices, restored when they still fit the grants. */
+  preferences: EntryPreferences | null;
   /** Called after each entry is saved, so it can be sent at once. */
   onSaved: () => void;
 }) {
   const { grants } = device;
-  const [grant, setGrant] = useState<Grant | undefined>(grants[0]);
-  const [source, setSource] = useState<Source>(
-    grant === undefined ? "OTHER" : defaultSource(grant),
-  );
-  const [role, setRole] = useState<SourceRole>("PRIMARY");
-  const [mode, setMode] = useState<TimeMode>("time-of-day");
+  const [start] = useState(() => initialChoice(grants, preferences));
+  const [grant, setGrant] = useState<Grant | undefined>(start?.grant);
+  const [source, setSource] = useState<Source>(start?.source ?? "OTHER");
+  const [role, setRole] = useState<SourceRole>(start?.sourceRole ?? "PRIMARY");
+  const [mode, setMode] = useState<TimeMode>(start?.mode ?? "time-of-day");
   const [precision, setPrecision] = useState<Precision>(
-    grant === undefined ? "DS" : defaultPrecision(grant.point),
+    start?.precision ?? "DS",
   );
   const [step, setStep] = useState<Step>("car");
   const [car, setCar] = useState("");
@@ -160,13 +167,27 @@ export function EntryView({
     void refreshRecent();
   }, [refreshRecent]);
 
+  // Remember the choices, so reopening the app does not reset them.
+  useEffect(() => {
+    if (grant === undefined) return;
+    void saveEntryPreferences(db, deviceKey.keyId, {
+      grant,
+      source,
+      sourceRole: role,
+      mode,
+      precision,
+    });
+  }, [db, deviceKey, grant, source, role, mode, precision]);
+
   function chooseGrant(key: string) {
     const next = grants.find((g) => grantKey(g) === key);
     if (next === undefined) return;
+    // A new target starts from its own defaults; the role is kept.
+    const defaults = defaultChoice(next);
     setGrant(next);
-    setSource(defaultSource(next));
-    setMode("time-of-day");
-    setPrecision(defaultPrecision(next.point));
+    setSource(defaults.source);
+    setMode(defaults.mode);
+    setPrecision(defaults.precision);
     setDigits("");
   }
 
@@ -352,7 +373,9 @@ export function EntryView({
       </div>
 
       <p aria-live="polite" className="mt-2 min-h-6 text-graphite">
-        {notice}
+        {step === "time" && masked.value === null
+          ? typingHint(mode, precision)
+          : notice}
       </p>
 
       <div className="mt-2">

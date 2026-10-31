@@ -6,6 +6,7 @@ import {
   maxDigits,
   precisionsFor,
   type TimeMode,
+  typingHint,
 } from "@/lib/client/time-input";
 import { PRECISION_UNIT_MS, type Precision } from "@/lib/record/types";
 
@@ -128,5 +129,28 @@ describe("maskTime", () => {
         });
       }),
     );
+  });
+});
+
+describe("typingHint", () => {
+  it.each<[TimeMode, Precision, string]>([
+    ["time-of-day", "MIN", "Type every digit: 0906 for 09:06"],
+    ["time-of-day", "S", "Type every digit: 090612 for 09:06:12"],
+    ["time-of-day", "DS", "Type every digit: 0906123 for 09:06:12,3"],
+    ["time-of-day", "MS", "Type every digit: 090612345 for 09:06:12,345"],
+    ["elapsed", "DS", "Type 7069 for 7.06,9"],
+    ["elapsed", "S", "Type 706 for 7.06"],
+  ])("%s at %s: %s", (mode, precision, hint) => {
+    expect(typingHint(mode, precision)).toBe(hint);
+  });
+
+  it("gives digits that the mask reads back as the example", () => {
+    for (const mode of ["time-of-day", "elapsed"] as const) {
+      for (const precision of precisionsFor(mode)) {
+        const [, digits = "", reads] =
+          /(\d+) for (.+)$/.exec(typingHint(mode, precision)) ?? [];
+        expect(maskTime(digits, mode, precision).display).toBe(reads);
+      }
+    }
   });
 });

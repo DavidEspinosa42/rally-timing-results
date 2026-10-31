@@ -5,6 +5,10 @@ import type { DeviceInfo } from "@/lib/api/contract";
 import { type LocalDb, localDb } from "@/lib/client/db";
 import { type DeviceKey, getDeviceKey } from "@/lib/client/device-key";
 import {
+  type EntryPreferences,
+  loadEntryPreferences,
+} from "@/lib/client/preferences";
+import {
   cachedDevice,
   chooseRally,
   chosenRally,
@@ -48,6 +52,7 @@ const MISSING_REASONS: Readonly<Record<Missing, string>> = {
 export function EntryApp() {
   const [state, setState] = useState<State>({ view: "loading" });
   const [persistence, setPersistence] = useState<Persistence>("unknown");
+  const [preferences, setPreferences] = useState<EntryPreferences | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,8 +70,13 @@ export function EntryApp() {
       const device =
         deviceKey === null ? null : await cachedDevice(db, deviceKey.keyId);
       const stored = await storagePersistence();
+      const saved =
+        deviceKey === null
+          ? null
+          : await loadEntryPreferences(db, deviceKey.keyId);
       if (cancelled) return;
       setPersistence(stored);
+      setPreferences(saved);
       setState(
         deviceKey !== null && device !== null
           ? { view: "entry", db, deviceKey, device }
@@ -116,7 +126,18 @@ export function EntryApp() {
     if (entryKey === null || entryDb === null || revoked) return;
     const loop = startSync({
       run: () => drain(entryDb, entryKey),
-      onStatus: setSyncStatus,
+      onStatus: (outcome) => {
+        setSyncStatus(outcome);
+        // The server's answer to a sync can arrive before the device lookup
+        // does: show the revoked screen at once instead of the cached grants.
+        if (outcome.problem?.reason === "revoked") {
+          setState((current) =>
+            current.view === "entry"
+              ? { ...current, device: { ...current.device, revoked: true } }
+              : current,
+          );
+        }
+      },
     });
     syncLoop.current = loop;
     return () => {
@@ -196,6 +217,7 @@ export function EntryApp() {
       device={state.device}
       persistence={persistence}
       syncStatus={syncStatus}
+      preferences={preferences}
       onSaved={() => syncLoop.current?.kick()}
     />
   );

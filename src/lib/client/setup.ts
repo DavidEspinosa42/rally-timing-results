@@ -5,7 +5,7 @@ import {
   type RallySummary,
   ralliesResponseSchema,
 } from "@/lib/api/contract";
-import { cachedDeviceSchema, type LocalDb, settingSchema } from "./db";
+import { cachedDeviceSchema, type LocalDb, rallySettingSchema } from "./db";
 
 // Setup needs a connection once: to choose the rally and to learn the grants
 // after the organizer authorizes the key. From then on the cached copy is
@@ -16,12 +16,12 @@ type Fetch = typeof fetch;
 /** The rally this phone was set up for, or null before setup. */
 export async function chosenRally(db: LocalDb): Promise<string | null> {
   const row = await db.settings.get("rallyId");
-  return row === undefined ? null : settingSchema.parse(row).value;
+  return row === undefined ? null : rallySettingSchema.parse(row).value;
 }
 
 export async function chooseRally(db: LocalDb, rallyId: string): Promise<void> {
   await db.settings.put(
-    settingSchema.parse({ name: "rallyId", value: rallyId }),
+    rallySettingSchema.parse({ name: "rallyId", value: rallyId }),
   );
 }
 

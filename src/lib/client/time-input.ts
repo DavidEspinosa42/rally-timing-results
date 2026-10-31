@@ -6,7 +6,7 @@ import {
   parseElapsed,
   parseTimeOfDay,
 } from "@/lib/record/time";
-import type { Precision } from "@/lib/record/types";
+import { PRECISION_UNIT_MS, type Precision } from "@/lib/record/types";
 
 // The marshal types digits only. They fill the time from the right, the way
 // a printed reading is copied, and the separators come from the mask:
@@ -113,4 +113,28 @@ export function formatTime(
   return mode === "time-of-day"
     ? formatTimeOfDay(ms, precision)
     : formatElapsed(ms, precision);
+}
+
+const SAMPLE_MS: Readonly<Record<TimeMode, number>> = {
+  // 09:06:12,345: a morning time, so the example shows the leading zero.
+  "time-of-day": 9 * 3_600_000 + 6 * 60_000 + 12_345,
+  // 7.06,945: a typical stage time.
+  elapsed: 7 * 60_000 + 6_945,
+};
+
+/**
+ * What to type for this mask, as an example in its own precision:
+ * "Type every digit: 0906124 for 09:06:12,4", or "Type 7069 for 7.06,9".
+ */
+export function typingHint(mode: TimeMode, precision: Precision): string {
+  const sample = SAMPLE_MS[mode];
+  const reads = formatTime(
+    sample - (sample % PRECISION_UNIT_MS[precision]),
+    mode,
+    precision,
+  );
+  const digits = reads.replace(/\D/g, "");
+  return mode === "time-of-day"
+    ? `Type every digit: ${digits} for ${reads}`
+    : `Type ${digits} for ${reads}`;
 }
