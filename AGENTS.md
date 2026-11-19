@@ -40,6 +40,32 @@ the device (Ed25519 via WebCrypto) and later synced to a local Postgres
 Before finishing any change, run `npm run typecheck && npm run lint && npm test`.
 All three must pass.
 
+## Sandbox
+
+Work happens in an offline Linux sandbox: 4 cores, 16 GB, no GPU, no
+phones, no outside services and no real users.
+
+- There is no internet. `npm ci` installs from the sandbox's npm mirror:
+  never set `registry` in `.npmrc` (npm rewrites the lockfile's
+  registry.npmjs.org URLs to the configured mirror). The build, the tests
+  and the running app must never need the network: no `next/font/google`,
+  CDNs, remote images or install-time downloads. Fonts are committed in
+  `src/app/_fonts/`.
+- The sandbox's Node.js version may differ: check `node -v` at the start of
+  a session and report it if it is below 22.13.0 (`devEngines` only warns).
+- Running programs pause between turns and may need a restart. At the start
+  of a session, check that `npm run db:server` is listening on the port in
+  `DATABASE_URL`, and restart it and any `npm run dev` or `npm start`. Run
+  servers in the background; a foreground command stops after 20 minutes.
+- Check the app in the desktop's browser at http://localhost:3100
+  (`localhost` is a secure context, so WebCrypto works). Simulate marshals'
+  devices and load with tests or local scripts. The desktop view lags:
+  prefer tests and output files over watching the screen.
+- Playwright is preinstalled in the sandbox but is not a project
+  dependency; ask before adding it, and point it at the desktop's bundled
+  Chrome. The sandbox's PostgreSQL, MariaDB and Redis are not used: the
+  database is PGlite behind `npm run db:server`.
+
 ## Layout
 
 - `src/lib/record/`: shared by client and server (types, time parsing,
@@ -138,8 +164,9 @@ All three must pass.
 - Conventional Commits: `feat(scope): …`, `fix`, `chore`, `docs`, `test`.
 - One concern per commit, small enough to review line by line. Each commit
   passes typecheck, lint, and test on its own.
-- Do not commit or push unless asked. Never commit `.data/` or any `.env*`
-  file other than `.env.example`.
+- A sandbox workspace may not persist: commit each change as soon as
+  typecheck, lint, and test pass. Never push unless asked. Never commit
+  `.data/` or any `.env*` file other than `.env.example`.
 - When you add or rename a script, update the Commands section here and the
   README in the same commit.
 
