@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Entry" };
 export default function EntryPage() {
   return (
     <main className="mx-auto w-full max-w-md px-4 pt-[max(env(safe-area-inset-top),1rem)] pb-[max(env(safe-area-inset-bottom),1.5rem)]">
-      <h1 className="mb-4 text-2xl font-bold">Rally Stage Times</h1>
+      <h1 className="mb-4 text-2xl font-bold">Rally Timing Results</h1>
       <EntryApp />
     </main>
   );

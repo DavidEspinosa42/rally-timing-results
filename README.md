@@ -1,4 +1,4 @@
-# Rally Stage Times
+# Rally Timing Results
 
 An offline-first web app for rally marshals. A marshal types in a car number
 and the time shown by the event's timing equipment; the phone signs each entry

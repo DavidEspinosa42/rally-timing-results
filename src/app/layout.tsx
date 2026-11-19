@@ -20,15 +20,18 @@ const atkinsonMono = Atkinson_Hyperlegible_Mono({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Rally Stage Times", template: "%s – Rally Stage Times" },
+  title: {
+    default: "Rally Timing Results",
+    template: "%s – Rally Timing Results",
+  },
   description:
     "Enter rally times read from the event's timing equipment. Each entry is signed on this device.",
-  applicationName: "Rally Stage Times",
+  applicationName: "Rally Timing Results",
   // Times and car numbers are digit runs; iOS must not turn them into links.
   formatDetection: { telephone: false, email: false, address: false },
   appleWebApp: {
     capable: true,
-    title: "Stage Times",
+    title: "Timing Results",
     statusBarStyle: "default",
   },
 };

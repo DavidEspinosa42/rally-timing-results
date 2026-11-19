@@ -125,7 +125,7 @@ describe("local database upgrade", () => {
     // A key made elsewhere, then stored through the version 1 schema alone.
     const key = await getOrCreateDeviceKey(open(), IDS.rally);
     const profile = newBrowserProfile();
-    const v1 = new Dexie("rally-timing-test", {
+    const v1 = new Dexie("rally-timing-results-test", {
       indexedDB: profile,
       IDBKeyRange,
     });

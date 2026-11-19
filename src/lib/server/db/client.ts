@@ -12,12 +12,12 @@ type Connection = { pool: Pool; db: NodePgDatabase };
 // Kept on globalThis so dev reloads reuse the pool instead of opening a new
 // one on every change.
 const store = globalThis as typeof globalThis & {
-  rallyTimingDb?: Connection | undefined;
+  rallyTimingResultsDb?: Connection | undefined;
 };
 
 /** The app's database, created on first use from DATABASE_URL. */
 export function getDb(): NodePgDatabase {
-  if (store.rallyTimingDb === undefined) {
+  if (store.rallyTimingResultsDb === undefined) {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) {
       throw new Error(
@@ -31,14 +31,14 @@ export function getDb(): NodePgDatabase {
       console.error("database connection lost:", error.message);
     });
     // No schema is passed: Relational Queries (db.query) stay unavailable.
-    store.rallyTimingDb = { pool, db: drizzle({ client: pool }) };
+    store.rallyTimingResultsDb = { pool, db: drizzle({ client: pool }) };
   }
-  return store.rallyTimingDb.db;
+  return store.rallyTimingResultsDb.db;
 }
 
 /** Closes the pool, so a script can exit. */
 export async function closeDb(): Promise<void> {
-  const connection = store.rallyTimingDb;
-  store.rallyTimingDb = undefined;
+  const connection = store.rallyTimingResultsDb;
+  store.rallyTimingResultsDb = undefined;
   await connection?.pool.end();
 }

@@ -5,8 +5,8 @@ import type { MetadataRoute } from "next";
 // has its own storage, so a key made in a Safari tab would be a different one.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Rally Stage Times",
-    short_name: "Stage Times",
+    name: "Rally Timing Results",
+    short_name: "Timing Results",
     description:
       "Enter rally times read from the event's timing equipment. Each entry is signed on this device.",
     start_url: "/entry",

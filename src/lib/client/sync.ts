@@ -162,7 +162,7 @@ export type SyncLoopOptions = {
 
 export type SyncLoop = { kick: () => void; stop: () => void };
 
-export const SYNC_LOCK = "rally-timing-sync";
+export const SYNC_LOCK = "rally-timing-results-sync";
 
 /**
  * Drains now, then again on `online`, when the page becomes visible, after

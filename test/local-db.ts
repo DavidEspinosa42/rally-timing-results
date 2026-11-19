@@ -10,5 +10,8 @@ export function newBrowserProfile(): IDBFactory {
 }
 
 export function openLocalDb(profile: IDBFactory): LocalDb {
-  return new LocalDb("rally-timing-test", { indexedDB: profile, IDBKeyRange });
+  return new LocalDb("rally-timing-results-test", {
+    indexedDB: profile,
+    IDBKeyRange,
+  });
 }

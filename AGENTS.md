@@ -12,7 +12,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project
 
-Rally Stage Times: an offline-first PWA where rally marshals manually enter
+Rally Timing Results: an offline-first PWA where rally marshals manually enter
 times read from the event's existing timing equipment. Each entry is signed on
 the device (Ed25519 via WebCrypto) and later synced to a local Postgres
 (PGlite). This app never measures time. Planned work is in `ROADMAP.md`.

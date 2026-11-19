@@ -9,7 +9,7 @@ export function generateImageMetadata() {
     id: String(size),
     size: { width: size, height: size },
     contentType: "image/png",
-    alt: "Rally Stage Times",
+    alt: "Rally Timing Results",
   }));
 }
 
