@@ -1,5 +1,5 @@
-# The same checks AGENTS.md requires before any change is done, plus the
-# production build (which also builds the service worker).
+# Typecheck, lint and tests, plus the production build (which also builds
+# the service worker).
 name: CI
 
 on:

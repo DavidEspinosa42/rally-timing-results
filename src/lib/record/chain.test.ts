@@ -207,7 +207,7 @@ describe("verifyChain", () => {
     });
   });
 
-  // A known limit, documented in docs/adr/0002-no-blockchain.md.
+  // A known limit of a hash chain on its own.
   it("cannot tell that the newest records were dropped", async () => {
     const links = await buildChain(5);
     expect(verifyChain(links.slice(0, 3)).ok).toBe(true);

@@ -7,7 +7,7 @@ import { type LocalDb, type StoredKey, storedKeySchema } from "./db";
 
 // One key per device and rally, generated once and authorized once. It is
 // never rotated per day: day 2 often starts where there is no signal to
-// authorize a new key (docs/adr/0004-one-key-per-device-and-rally.md).
+// authorize a new key.
 
 export type DeviceKey = StoredKey;
 

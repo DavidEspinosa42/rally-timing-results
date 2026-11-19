@@ -4,7 +4,7 @@ import type { RecordV1 } from "./types";
 // `seq`, and each one carries the hash of the record before it. Altering,
 // removing or reordering a record breaks the chain after it. Dropping the
 // newest records does not, unless the device's latest `seq` is known from
-// elsewhere (see docs/adr/0002-no-blockchain.md).
+// elsewhere.
 
 /** The last record of a chain that is already trusted (null: none yet). */
 export type ChainHead = { seq: number; hash: string } | null;

@@ -12,8 +12,8 @@ import {
   stages,
 } from "./db/schema";
 
-// A dummy rally with the structure of a typical regional event (see
-// docs/domain.md): one leg over two days, four sections, a non-scoring
+// A dummy rally with the structure of a typical regional event: one leg
+// over two days, four sections, a non-scoring
 // shakedown, seven special stages ending in a Power Stage, and coded time
 // controls. Every name and number is generated; nothing comes from a real
 // event or person.

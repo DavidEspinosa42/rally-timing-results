@@ -325,8 +325,8 @@ describe("storeBatch", () => {
     });
   });
 
-  // Why verification reads `payload` (docs/adr/0005): the driver itself does
-  // not round-trip bigint columns as numbers.
+  // Why verification reads the stored `payload`, never JSON rebuilt from
+  // columns: the driver itself does not round-trip bigint columns as numbers.
   it("gets bigint columns back from pg as strings", async () => {
     const device = await TestDevice.create();
     await storeBatch(getDb(), await device.signMany(1));

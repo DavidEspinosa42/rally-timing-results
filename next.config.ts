@@ -5,10 +5,8 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   typedRoutes: true,
+  agentRules: false,
   experimental: {
-    // No upgrade reminders: they query the npm registry for advisories on
-    // every `next dev` and `next build`, and development runs offline.
-    // Check for Next.js security releases with `npm audit` instead.
     agentUpgrade: false,
   },
   // The entry screen is the only screen.
