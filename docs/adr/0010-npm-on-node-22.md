@@ -50,5 +50,9 @@ configurator mode (ADR 7).
   lockfile holds versions that support 22.13 (for example `@inquirer/core`
   12.0.6, not 12.1.0, which needs 22.22.2). Updating dependencies on a newer
   Node.js can lock versions that drop 22.13; check `engines` after updates.
+- Vite is a direct, pinned devDependency (8.x, which supports 22.12 and up)
+  rather than left to npm as vitest's peer: on an older Node.js, npm picks
+  Vite 6, which cannot read tsconfig `paths` (`resolve.tsconfigPaths` in
+  `vitest.config.mts`).
 - WebCrypto Ed25519, which signs and verifies every record, is no longer
   marked experimental from Node.js 22.13.
