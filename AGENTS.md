@@ -56,6 +56,8 @@ All three must pass.
   and type-checked by `tsconfig.sw.json`, not `tsconfig.json`.
 - `src/app/entry/`: the entry screen, a static shell around the client
   components in `_components/`. `/` redirects there.
+- `src/app/_fonts/`: the committed Atkinson Hyperlegible font files and their
+  SIL Open Font License texts, loaded with `next/font/local`.
 - `scripts/`: command-line scripts run outside Next.
 - `drizzle/`: generated SQL migrations and drizzle-kit snapshots (not
   checked by Biome).

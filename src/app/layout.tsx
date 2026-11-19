@@ -1,22 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import {
-  Atkinson_Hyperlegible_Mono,
-  Atkinson_Hyperlegible_Next,
-} from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ServiceWorkerRegistration } from "./sw-register";
 
 // Atkinson Hyperlegible was drawn so that 1 and 7, 0 and 8, 6 and 9 cannot be
 // mistaken for each other, which is what matters when copying times. The
 // mono cut is used only for the readback, like a timing printer's tape.
-const atkinson = Atkinson_Hyperlegible_Next({
+// The files are Google Fonts' latin subsets (variable weight, SIL OFL),
+// committed so the build needs no network.
+const atkinson = localFont({
+  src: "./_fonts/atkinson-hyperlegible-next-latin.woff2",
+  weight: "200 800",
   variable: "--font-atkinson",
-  subsets: ["latin"],
 });
 
-const atkinsonMono = Atkinson_Hyperlegible_Mono({
+const atkinsonMono = localFont({
+  src: "./_fonts/atkinson-hyperlegible-mono-latin.woff2",
+  weight: "200 800",
   variable: "--font-atkinson-mono",
-  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {

@@ -95,6 +95,10 @@ minimums; npm only warns on an older version, but every dependency supports
 22.13.0 and up. With [nvm-windows](https://github.com/coreybutler/nvm-windows)
 or nvm: `nvm install 22.13.0`, then `nvm use 22.13.0`.
 
+Only `npm ci` needs a network, to reach the npm registry or a mirror of it.
+The build, the tests and the app run offline; the fonts are committed in
+`src/app/_fonts/`.
+
 ```sh
 npm ci
 npm run dev                  # http://localhost:3000, with db:server running
