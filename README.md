@@ -104,7 +104,8 @@ npm run dev                  # http://localhost:3000
 - Checks: `npm run check` runs `npm run typecheck`, `npm run lint` and
   `npm test`.
 - PGlite keeps its data in `.data/pglite`. To start over, stop `db:server`
-  and delete `.data/`.
+  and run `npm run db:reset`, which deletes it (and refuses while
+  `db:server` is running); then start `db:server`, migrate and seed again.
 
 Phones reach the app over HTTPS (or `localhost`), since the browser offers
 its signing API only in a secure context. Install it to the Home Screen

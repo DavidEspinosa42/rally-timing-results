@@ -2,45 +2,17 @@
 // only process that opens .data/pglite: Next, the scripts and drizzle-kit
 // all connect through DATABASE_URL.
 import { mkdir } from "node:fs/promises";
-import { createServer } from "node:net";
 import { dirname } from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 import { PGLiteSocketServer } from "@electric-sql/pglite-socket";
-// @next/env is bundled CommonJS: Node cannot see its named exports.
-import nextEnv from "@next/env";
+import { DATA_DIR, HOST, isPortFree, portFromEnv } from "./lib/local-db.mjs";
 
-const DATA_DIR = "./.data/pglite";
-// The socket server has no SSL, so it only listens on loopback.
-const HOST = "127.0.0.1";
 // Above the app's pool size (src/lib/server/db/client.ts), leaving room for
 // a script to connect while the app runs.
 const MAX_CONNECTIONS = 8;
 
-nextEnv.loadEnvConfig(process.cwd());
-
-function portFromEnv(): number {
-  const url = process.env.DATABASE_URL;
-  if (!url) {
-    throw new Error("DATABASE_URL is not set; copy .env.example to .env.local");
-  }
-  const { hostname, port } = new URL(url);
-  if (hostname !== HOST && hostname !== "localhost") {
-    throw new Error(`DATABASE_URL must point at ${HOST}, not ${hostname}`);
-  }
-  if (port === "") throw new Error("DATABASE_URL must include a port");
-  return Number(port);
-}
-
-// Checked before PGlite opens the directory: a second server must exit
-// without touching the data of the one already running.
-function isPortFree(port: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    const probe = createServer();
-    probe.once("error", () => resolve(false));
-    probe.listen(port, HOST, () => probe.close(() => resolve(true)));
-  });
-}
-
+// The port is checked before PGlite opens the directory: a second server
+// must exit without touching the data of the one already running.
 const port = portFromEnv();
 if (!(await isPortFree(port))) {
   console.error(
