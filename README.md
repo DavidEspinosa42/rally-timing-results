@@ -101,7 +101,8 @@ npm run dev                  # http://localhost:3000
 - `npm run device:authorize -- <public-key> SS3 FINISH` lets a device enter
   one point (`SS<n>` with `START`, `FINISH`, `SPLIT` or `STOP`, or `TC<code>`
   with `TC`). The public key is the one the device's setup screen shows.
-- Checks: `npm run typecheck`, `npm run lint` and `npm test`.
+- Checks: `npm run check` runs `npm run typecheck`, `npm run lint` and
+  `npm test`.
 - PGlite keeps its data in `.data/pglite`. To start over, stop `db:server`
   and delete `.data/`.
 

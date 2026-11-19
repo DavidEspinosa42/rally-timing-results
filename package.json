@@ -15,7 +15,8 @@
     "db:migrate": "node --conditions=react-server --import tsx scripts/db-migrate.mts",
     "db:generate": "node --conditions=react-server node_modules/drizzle-kit/bin.cjs generate",
     "db:seed": "node --conditions=react-server --import tsx scripts/db-seed.mts",
-    "device:authorize": "node --conditions=react-server --import tsx scripts/device-authorize.mts"
+    "device:authorize": "node --conditions=react-server --import tsx scripts/device-authorize.mts",
+    "check": "npm run typecheck && npm run lint && npm test"
   },
   "dependencies": {
     "client-only": "0.0.1",
