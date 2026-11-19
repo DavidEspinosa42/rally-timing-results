@@ -14,5 +14,12 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    coverage: {
+      provider: "v8",
+      include: ["src/**/*.{ts,tsx}"],
+      // The summary prints with every run; the HTML report in coverage/
+      // shows each file line by line.
+      reporter: ["text-summary", "html", "json-summary"],
+    },
   },
 });
