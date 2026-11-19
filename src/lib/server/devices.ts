@@ -81,7 +81,7 @@ async function chooseRally(
   }
   const [only, ...others] = all;
   if (only === undefined)
-    return fail("there is no rally yet; run pnpm db:seed");
+    return fail("there is no rally yet; run npm run db:seed");
   if (others.length > 0) {
     const list = all.map((rally) => `  ${rally.id}  ${rally.name}`).join("\n");
     return fail(`there are several rallies; pass --rally <id>:\n${list}`);

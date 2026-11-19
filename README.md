@@ -54,10 +54,10 @@ flowchart TB
   end
 
   subgraph database["Local Postgres"]
-    dbserver["pnpm db:server<br/>PGlite over the Postgres protocol"] --> data[(".data/pglite")]
+    dbserver["npm run db:server<br/>PGlite over the Postgres protocol"] --> data[(".data/pglite")]
   end
 
-  organizer["Organizer's command line<br/>pnpm db:seed, pnpm device:authorize"]
+  organizer["Organizer's command line<br/>npm run db:seed, npm run device:authorize"]
 
   sync -- "signed records, when there is a connection" --> server
   server -- "pg pool, DATABASE_URL" --> database
@@ -69,7 +69,7 @@ anything touches the network; syncing only moves records that already exist.
 The server verifies each record (its format, its signature, what the device
 is allowed to enter, and its place in the device's chain) and stores the
 signed payload exactly as received, so it can be verified again at any time.
-Only `pnpm db:server` opens the database files; everything else connects
+Only `npm run db:server` opens the database files; everything else connects
 through `DATABASE_URL`. The reasons behind these choices are in
 [docs/adr/](docs/adr/).
 
@@ -83,20 +83,22 @@ through `DATABASE_URL`. The reasons behind these choices are in
 - On the server: [PGlite](https://pglite.dev) (Postgres in WebAssembly) behind
   a small socket server, [Drizzle ORM](https://orm.drizzle.team) with `pg`,
   and [zod](https://zod.dev) to check every request and record.
-- Tooling: pnpm 12 on Node.js 26, [Vitest](https://vitest.dev) with
+- Tooling: npm 10.9+ on Node.js 22.13+, [Vitest](https://vitest.dev) with
   fast-check and fake-indexeddb, and [Biome](https://biomejs.dev) for lint and
   format.
 
 ## Setup
 
-Requires [pnpm](https://pnpm.io) 12 (the version in `packageManager`). pnpm
-downloads and uses the Node.js version declared in `package.json`
-(`devEngines.runtime`) for the project's scripts.
+Requires Node.js 22.13.0 or later with npm 10.9.0 or later (Node.js 22.13.0
+ships with npm 10.9.2). `devEngines` in `package.json` declares these
+minimums; npm only warns on an older version, but every dependency supports
+22.13.0 and up. With [nvm-windows](https://github.com/coreybutler/nvm-windows)
+or nvm: `nvm install 22.13.0`, then `nvm use 22.13.0`.
 
 ```sh
-pnpm install
-pnpm dev                # http://localhost:3000, with db:server running
-pnpm build && pnpm start   # production build, on http://localhost:3100
+npm ci
+npm run dev                  # http://localhost:3000, with db:server running
+npm run build && npm start   # production build, on http://localhost:3100
 ```
 
 The app needs the local database: see [Database](#database).
@@ -104,9 +106,9 @@ The app needs the local database: see [Database](#database).
 Checks, all of which must pass before a change is done:
 
 ```sh
-pnpm typecheck          # next typegen, then tsc --noEmit (TypeScript 7)
-pnpm lint               # Biome; auto-fix with pnpm lint --write
-pnpm test               # Vitest; one file: pnpm test path/to/file.test.ts
+npm run typecheck   # next typegen, then tsc --noEmit (TypeScript 7)
+npm run lint        # Biome; auto-fix with npm run lint -- --write
+npm test            # Vitest; one file: npm test -- path/to/file.test.ts
 ```
 
 ## Database
@@ -116,17 +118,17 @@ installed server. Its data lives in `.data/pglite` (git-ignored).
 
 ```sh
 cp .env.example .env.local   # once; DATABASE_URL points at the local server
-pnpm db:server               # in its own terminal; stop it with Ctrl+C
-pnpm db:migrate              # applies the migrations in drizzle/
+npm run db:server            # in its own terminal; stop it with Ctrl+C
+npm run db:migrate           # applies the migrations in drizzle/
 ```
 
-- `pnpm db:server` is the only process that opens `.data/pglite`. It listens
+- `npm run db:server` is the only process that opens `.data/pglite`. It listens
   on `127.0.0.1` at the port in `DATABASE_URL`, and the app, the scripts and
   drizzle-kit all connect through that URL. A second copy finds the port in
   use and exits without opening the data.
 - Stop it with Ctrl+C so it closes the database cleanly.
 - After changing `src/lib/server/db/schema.ts`, run
-  `pnpm db:generate --name <change>`, then `pnpm db:migrate`. The files in
+  `npm run db:generate -- --name <change>`, then `npm run db:migrate`. The files in
   `drizzle/` are generated; do not edit them.
 - To start over, stop `db:server` and delete `.data/`.
 - Moving to a hosted or installed Postgres only changes `DATABASE_URL`.
@@ -137,17 +139,17 @@ There is no admin interface yet: rallies and devices are set up from the
 command line, with `db:server` running.
 
 ```sh
-pnpm db:seed
-pnpm device:authorize <public-key> SS3 FINISH
-pnpm device:authorize <public-key> TC4A TC
+npm run db:seed
+npm run device:authorize -- <public-key> SS3 FINISH
+npm run device:authorize -- <public-key> TC4A TC
 ```
 
-- `pnpm db:seed` creates a dummy rally with generated data only. Its
+- `npm run db:seed` creates a dummy rally with generated data only. Its
   structure follows a typical regional event: one leg over two days, four
   sections, a non-scoring shakedown (`SS0`), seven special stages ending in a
   Power Stage, coded time controls with allotted times, a flexi service with
   a maximum, and 70 car numbers in 10 classes. Running it again does nothing.
-- `pnpm device:authorize` registers a device's raw Ed25519 public key
+- `npm run device:authorize` registers a device's raw Ed25519 public key
   (the 64 hex characters its setup screen shows) and grants it one point: `SS<n>` with
   `START`, `FINISH`, `SPLIT` or `STOP`, or `TC<code>` with `TC`. Run it again
   for each further point; one device can hold several, for example a regroup
@@ -174,7 +176,7 @@ Then, on the phone:
 2. Tap Set up this device. This asks the browser to keep the app's storage
    and creates the device's key. The screen shows "Storage: persistent" when
    the browser agreed, or "May be cleared: install to Home Screen".
-3. Give the key shown to the organizer, who runs `pnpm device:authorize` for
+3. Give the key shown to the organizer, who runs `npm run device:authorize` for
    each point the phone will enter, then tap Check authorization.
 
 Each entry is signed and saved on the phone first, and sent to the server
@@ -191,22 +193,22 @@ signing API only in a secure context.
 ## Testing offline
 
 The service worker exists only in the production build, so test offline
-behavior there, never with `pnpm dev`:
+behavior there, never with `npm run dev`:
 
 ```sh
-pnpm db:server               # in its own terminal
-pnpm build && pnpm start     # http://localhost:3100
+npm run db:server            # in its own terminal
+npm run build && npm start   # http://localhost:3100
 ```
 
 1. Open http://localhost:3100/entry, set up the device and enter a time. The
    service worker is now installed and holds the entry screen.
-2. Stop `pnpm start` (leave `db:server` running) and reload the page. It
+2. Stop `npm start` (leave `db:server` running) and reload the page. It
    still opens, and entries are signed and saved; the top line counts them
    as waiting. Any page the worker does not hold shows "No connection".
-3. Start `pnpm start` again. Within a few seconds the waiting entries reach
+3. Start `npm start` again. Within a few seconds the waiting entries reach
    the server and the line reads "All entries synced".
 
-`pnpm start` uses port 3100 so the production worker never takes control of
+`npm start` uses port 3100 so the production worker never takes control of
 the dev server's origin (port 3000). The worker never caches `/api/`, so a
 stopped server shows as unreachable instead of answering from a cache. A new
 build takes over only once every tab of the app is closed, never in the

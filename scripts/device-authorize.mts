@@ -11,7 +11,7 @@ import {
   parseTarget,
 } from "@/lib/server/devices";
 
-const USAGE = `Usage: pnpm device:authorize <public-key> <target> <point> [--rally <id>]
+const USAGE = `Usage: npm run device:authorize -- <public-key> <target> <point> [--rally <id>]
 
   <public-key>  the device's raw Ed25519 public key, 64 hex characters
   <target>      SS<number> for a special stage (SS0 is the shakedown),

@@ -19,25 +19,25 @@ the device (Ed25519 via WebCrypto) and later synced to a local Postgres
 
 ## Commands
 
-- Install: `pnpm install`, then copy `.env.example` to `.env.local`
-- Database: `pnpm db:server`, in its own terminal. It is the only process that
+- Install: `npm ci`, then copy `.env.example` to `.env.local`
+- Database: `npm run db:server`, in its own terminal. It is the only process that
   opens `.data/pglite`; everything else connects through `DATABASE_URL`.
-- Migrations: `pnpm db:migrate` (with `db:server` running)
+- Migrations: `npm run db:migrate` (with `db:server` running)
 - New migration after editing `src/lib/server/db/schema.ts`:
-  `pnpm db:generate --name <change>`. Never edit files in `drizzle/` by hand.
-- Seed dummy data: `pnpm db:seed` (with `db:server` running)
-- Authorize a device: `pnpm device:authorize <public-key> <SS<n>|TC<code>> <point>`;
+  `npm run db:generate -- --name <change>`. Never edit files in `drizzle/` by hand.
+- Seed dummy data: `npm run db:seed` (with `db:server` running)
+- Authorize a device: `npm run device:authorize -- <public-key> <SS<n>|TC<code>> <point>`;
   repeat to grant more points. Add `--rally <id>` when there are several rallies.
-- Dev server: `pnpm dev` (needs `db:server` running; service worker is disabled in dev)
-- Production build: `pnpm build` (runs `next build && serwist build`), then
-  `pnpm start` (port 3100, so the production service worker never controls the
+- Dev server: `npm run dev` (needs `db:server` running; service worker is disabled in dev)
+- Production build: `npm run build` (runs `next build && serwist build`), then
+  `npm start` (port 3100, so the production service worker never controls the
   dev origin). Test offline behavior only on this build, never in dev.
-- Type check: `pnpm typecheck` (runs `next typegen`, then `tsc --noEmit` for the
+- Type check: `npm run typecheck` (runs `next typegen`, then `tsc --noEmit` for the
   app and for the service worker's `tsconfig.sw.json`)
-- Lint and format check: `pnpm lint` (Biome); auto-fix: `pnpm lint --write`
-- Tests: `pnpm test`; one file: `pnpm test path/to/file.test.ts`
+- Lint and format check: `npm run lint` (Biome); auto-fix: `npm run lint -- --write`
+- Tests: `npm test`; one file: `npm test -- path/to/file.test.ts`
 
-Before finishing any change, run `pnpm typecheck && pnpm lint && pnpm test`.
+Before finishing any change, run `npm run typecheck && npm run lint && npm test`.
 All three must pass.
 
 ## Layout
@@ -118,11 +118,18 @@ All three must pass.
 ## Dependencies
 
 - Ask before adding a dependency. Prefer platform APIs.
-- Keep versions pinned (`saveExact`). Check current library docs before using
-  an API.
-- Never lower `minimumReleaseAge` or turn off `trustPolicy` to get a fresh
-  release installed; wait for it instead.
-- Use the Node version pnpm pins (`devEngines.runtime`); do not add `.nvmrc`.
+- Keep versions pinned (`save-exact` in `.npmrc`). Check current library docs
+  before using an API.
+- Every version in `package-lock.json`, direct or transitive, must be at
+  least 7 days old, so a registry cache that only holds such versions can
+  serve `npm ci`. Install and update with
+  `--before "$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)"`. npm 10 has no
+  rolling release-age setting, so this is manual; do not move to npm 11 for
+  `min-release-age`.
+- Keep `ignore-scripts=true` in `.npmrc`: dependency install scripts never run.
+- Use Node.js 22.13.0 or later with npm 10.9.0 or later (`devEngines` in
+  `package.json`, which only warns). Every dependency must support Node.js
+  22.13.0: check `engines` before adding or updating one. Do not add `.nvmrc`.
 
 ## Commits
 

@@ -1,7 +1,0 @@
-allowBuilds:
-  esbuild: false
-  sharp: false
-  unrs-resolver: false
-saveExact: true
-trustPolicy: no-downgrade
-minimumReleaseAge: 1440

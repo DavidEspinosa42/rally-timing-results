@@ -15,7 +15,7 @@ open its data directory.
 
 ## Decision
 
-The database is PGlite in `./.data/pglite`, opened only by `pnpm db:server`.
+The database is PGlite in `./.data/pglite`, opened only by `npm run db:server`.
 That script checks that its port is free before opening the directory, then
 serves the database over the Postgres protocol (`@electric-sql/pglite-socket`)
 on `127.0.0.1`. Everything else (Next.js, scripts, drizzle-kit) connects with

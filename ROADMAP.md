@@ -10,8 +10,8 @@
 2. Read `src/lib/record/types.ts`: the signed record v1 and its enums are the
    core of the domain. Most items below add logic on top of these records
    rather than new record fields; a new signed field needs a `v2` schema.
-3. Run the app with the seeded dummy rally (`pnpm db:server`, `pnpm db:migrate`,
-   `pnpm db:seed`, `pnpm dev`) and enter a few times on `/entry`.
+3. Run the app with the seeded dummy rally (`npm run db:server`, `npm run db:migrate`,
+   `npm run db:seed`, `npm run dev`) and enter a few times on `/entry`.
 4. Rule values (penalties, tolerances, intervals) are the common defaults
    described in `docs/domain.md`. Championships can differ, so code takes them
    as per-rally settings instead of constants.
@@ -23,7 +23,7 @@ Roadmap work starts from the finished initial version, which provides:
 - A signed record format (v1): types, time parsing (including the Argentine
   notation `m.ss,t`), canonical encoding, SHA-256 hashing, Ed25519 signing, and
   a per-device hash chain.
-- A local Postgres (PGlite) served by `pnpm db:server`, with a Drizzle schema
+- A local Postgres (PGlite) served by `npm run db:server`, with a Drizzle schema
   for the full rally structure (legs, sections, special stages, time controls,
   classes, entries), devices, grants, and records.
 - `POST /api/sync`, which verifies signature, device authorization, and chain
