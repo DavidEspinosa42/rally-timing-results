@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Domain separation: the signature covers this string, so a v1 signature can
 // never be replayed as a record of another schema version.
-export const RECORD_SCHEMA_V1 = "rally-timing/record/v1";
+export const RECORD_SCHEMA_V1 = "rally-timing-results/record/v1";
 
 export const RECORD_KINDS = ["TIME", "PENALTY", "STATUS", "VOID"] as const;
 export type RecordKind = (typeof RECORD_KINDS)[number];

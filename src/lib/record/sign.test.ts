@@ -54,7 +54,7 @@ describe("signRecord", () => {
     // The type forbids this; the test is that the runtime check does too.
     const v2 = {
       ...record,
-      schema: "rally-timing/record/v2",
+      schema: "rally-timing-results/record/v2",
     } as unknown as RecordV1;
     await expect(signRecord(v2, keys.privateKey)).rejects.toThrow();
   });
@@ -126,8 +126,8 @@ describe("verifyRecord", () => {
 
   it("fails when the schema is changed to another version", async () => {
     const payload = signed.payload.replace(
-      "rally-timing/record/v1",
-      "rally-timing/record/v2",
+      "rally-timing-results/record/v1",
+      "rally-timing-results/record/v2",
     );
     expect(await verifyRecord({ ...signed, payload }, keys.publicKey)).toEqual({
       ok: false,

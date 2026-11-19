@@ -98,7 +98,7 @@ export const syncStateSchema = z.strictObject({
 });
 export type SyncState = z.infer<typeof syncStateSchema>;
 
-export const LOCAL_DB_NAME = "rally-timing";
+export const LOCAL_DB_NAME = "rally-timing-results";
 
 export class LocalDb extends Dexie {
   declare readonly keys: EntityTable<StoredKey, "rallyId">;

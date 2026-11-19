@@ -71,7 +71,7 @@ describe("enterRecord", () => {
     );
 
     expect(record).toMatchObject({
-      schema: "rally-timing/record/v1",
+      schema: "rally-timing-results/record/v1",
       deviceKeyId: key.keyId,
       rallyId: IDS.rally,
       seq: 0,

@@ -44,9 +44,9 @@ describe("recordV1Schema", () => {
   });
 
   it("rejects another schema version", () => {
-    expect(accepts({ ...timeRecord(), schema: "rally-timing/record/v2" })).toBe(
-      false,
-    );
+    expect(
+      accepts({ ...timeRecord(), schema: "rally-timing-results/record/v2" }),
+    ).toBe(false);
   });
 
   it.each([
