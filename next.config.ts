@@ -6,9 +6,10 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   typedRoutes: true,
   experimental: {
-    // `next dev` and `next build` remind about Next.js security releases
-    // only; `next upgrade --agent` uses the same policy.
-    agentUpgrade: "security",
+    // No upgrade reminders: they query the npm registry for advisories on
+    // every `next dev` and `next build`, and development runs offline.
+    // Check for Next.js security releases with `npm audit` instead.
+    agentUpgrade: false,
   },
   // The entry screen is the only screen.
   async redirects() {

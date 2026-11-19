@@ -23,12 +23,19 @@ lockfile is generated on Windows, and the sandbox installs on Linux.
 - The lockfile lists every platform's native package (Next.js SWC, Biome,
   rolldown, esbuild, lightningcss, Tailwind's oxide, sharp, TypeScript 7), so
   `npm ci` on Linux finds the Linux x64 builds.
+- Next.js telemetry is off (`NEXT_TELEMETRY_DISABLED=1` in `.env.example`,
+  which setup copies to `.env.local`; Next reads it before it starts
+  telemetry), and so are its upgrade reminders, which query the npm
+  registry's advisories on every `next dev` and `next build`
+  (`experimental.agentUpgrade: false` in `next.config.ts`).
 
 ## Consequences
 
-- With every Node.js network call blocked, typecheck, lint, the tests and
-  the production build all pass. The only attempts were Next.js telemetry
-  and its security-advisory check, which fail quietly.
+- With every Node.js network call blocked, none is attempted by typecheck,
+  lint, the tests, the production build, `next dev`, `next start`, the
+  database scripts or `device:authorize`, and they all pass.
+- Next.js security releases are no longer announced during builds: check
+  them with `npm audit` where there is a network.
 - Updating the fonts is manual: download the new files and replace them.
 - Text renders as before; the build no longer warns that it cannot find font
   override values.

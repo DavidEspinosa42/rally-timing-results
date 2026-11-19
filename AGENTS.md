@@ -50,7 +50,8 @@ phones, no outside services and no real users.
   registry.npmjs.org URLs to the configured mirror). The build, the tests
   and the running app must never need the network: no `next/font/google`,
   CDNs, remote images or install-time downloads. Fonts are committed in
-  `src/app/_fonts/`.
+  `src/app/_fonts/`. Next.js telemetry (`.env.example`) and upgrade
+  reminders (`experimental.agentUpgrade` in `next.config.ts`) stay off.
 - The sandbox's Node.js version may differ: check `node -v` at the start of
   a session and report it if it is below 22.13.0 (`devEngines` only warns).
 - Running programs pause between turns and may need a restart. At the start
