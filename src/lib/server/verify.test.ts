@@ -388,3 +388,47 @@ describe("POST /api/sync", () => {
     expect((await post(body)).status).toBe(400);
   });
 });
+
+describe("the records table", () => {
+  /** Postgres' restrict_violation, raised by the append-only trigger. */
+  const appendOnly = { cause: { code: "23001" } };
+
+  it("refuses to update a stored record", async () => {
+    const device = await TestDevice.create();
+    const [signed] = await device.signMany(1);
+    if (signed === undefined) throw new Error("no record");
+    await storeBatch(getDb(), [signed]);
+
+    await expect(
+      getDb()
+        .update(records)
+        .set({ carNumber: 999 })
+        .where(eq(records.deviceKeyId, device.keyId)),
+    ).rejects.toMatchObject(appendOnly);
+    const [row] = await getDb()
+      .select({ payload: records.payload })
+      .from(records)
+      .where(eq(records.deviceKeyId, device.keyId));
+    expect(row?.payload).toBe(signed.payload);
+  });
+
+  it("refuses to delete a stored record", async () => {
+    const device = await TestDevice.create();
+    await storeBatch(getDb(), await device.signMany(2));
+
+    await expect(
+      getDb().delete(records).where(eq(records.deviceKeyId, device.keyId)),
+    ).rejects.toMatchObject(appendOnly);
+    expect(await device.storedCount()).toBe(2);
+  });
+
+  it("refuses to truncate the table", async () => {
+    const device = await TestDevice.create();
+    await storeBatch(getDb(), await device.signMany(1));
+
+    await expect(getDb().execute(sql`truncate records`)).rejects.toMatchObject(
+      appendOnly,
+    );
+    expect(await device.storedCount()).toBe(1);
+  });
+});

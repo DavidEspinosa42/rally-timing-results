@@ -1,0 +1,1084 @@
+{
+  "id": "eaebf45e-f66b-455a-87c5-5a124de9f9c5",
+  "prevId": "25d5b7fe-9edb-4a85-bf45-8509b47a58da",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.classes": {
+      "name": "classes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "rally_id": {
+          "name": "rally_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "classes_rally_id_rallies_id_fk": {
+          "name": "classes_rally_id_rallies_id_fk",
+          "tableFrom": "classes",
+          "columnsFrom": [
+            "rally_id"
+          ],
+          "tableTo": "rallies",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "classes_rally_id_code_unique": {
+          "name": "classes_rally_id_code_unique",
+          "columns": [
+            "rally_id",
+            "code"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.controls": {
+      "name": "controls",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "section_id": {
+          "name": "section_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "control_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'TC'"
+        },
+        "allotted_min": {
+          "name": "allotted_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_min": {
+          "name": "max_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "early_allowed": {
+          "name": "early_allowed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "controls_section_id_sections_id_fk": {
+          "name": "controls_section_id_sections_id_fk",
+          "tableFrom": "controls",
+          "columnsFrom": [
+            "section_id"
+          ],
+          "tableTo": "sections",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "controls_section_id_position_unique": {
+          "name": "controls_section_id_position_unique",
+          "columns": [
+            "section_id",
+            "position"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "controls_minutes_non_negative": {
+          "name": "controls_minutes_non_negative",
+          "value": "coalesce(\"controls\".\"allotted_min\", 0) >= 0 AND coalesce(\"controls\".\"max_min\", 0) >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.device_grants": {
+      "name": "device_grants",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "device_key_id": {
+          "name": "device_key_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stage_id": {
+          "name": "stage_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "control_id": {
+          "name": "control_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "point": {
+          "name": "point",
+          "type": "record_point",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "device_grants_device_key_id_devices_key_id_fk": {
+          "name": "device_grants_device_key_id_devices_key_id_fk",
+          "tableFrom": "device_grants",
+          "columnsFrom": [
+            "device_key_id"
+          ],
+          "tableTo": "devices",
+          "columnsTo": [
+            "key_id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "device_grants_stage_id_stages_id_fk": {
+          "name": "device_grants_stage_id_stages_id_fk",
+          "tableFrom": "device_grants",
+          "columnsFrom": [
+            "stage_id"
+          ],
+          "tableTo": "stages",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "device_grants_control_id_controls_id_fk": {
+          "name": "device_grants_control_id_controls_id_fk",
+          "tableFrom": "device_grants",
+          "columnsFrom": [
+            "control_id"
+          ],
+          "tableTo": "controls",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "device_grants_device_key_id_stage_id_control_id_point_unique": {
+          "name": "device_grants_device_key_id_stage_id_control_id_point_unique",
+          "columns": [
+            "device_key_id",
+            "stage_id",
+            "control_id",
+            "point"
+          ],
+          "nullsNotDistinct": true
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "device_grants_one_target": {
+          "name": "device_grants_one_target",
+          "value": "(\"device_grants\".\"stage_id\" IS NULL) <> (\"device_grants\".\"control_id\" IS NULL)"
+        },
+        "device_grants_point_matches_target": {
+          "name": "device_grants_point_matches_target",
+          "value": "(\"device_grants\".\"control_id\" IS NOT NULL) = (\"device_grants\".\"point\" = 'TC')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.devices": {
+      "name": "devices",
+      "schema": "",
+      "columns": {
+        "key_id": {
+          "name": "key_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "public_key": {
+          "name": "public_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rally_id": {
+          "name": "rally_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "authorized_at": {
+          "name": "authorized_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "devices_rally_id_rallies_id_fk": {
+          "name": "devices_rally_id_rallies_id_fk",
+          "tableFrom": "devices",
+          "columnsFrom": [
+            "rally_id"
+          ],
+          "tableTo": "rallies",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "devices_public_key_unique": {
+          "name": "devices_public_key_unique",
+          "columns": [
+            "public_key"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "devices_key_id_hex": {
+          "name": "devices_key_id_hex",
+          "value": "\"devices\".\"key_id\" ~ '^[0-9a-f]{64}$'"
+        },
+        "devices_public_key_hex": {
+          "name": "devices_public_key_hex",
+          "value": "\"devices\".\"public_key\" ~ '^[0-9a-f]{64}$'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.entries": {
+      "name": "entries",
+      "schema": "",
+      "columns": {
+        "rally_id": {
+          "name": "rally_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "car_number": {
+          "name": "car_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "class_id": {
+          "name": "class_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "entries_rally_id_rallies_id_fk": {
+          "name": "entries_rally_id_rallies_id_fk",
+          "tableFrom": "entries",
+          "columnsFrom": [
+            "rally_id"
+          ],
+          "tableTo": "rallies",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "entries_class_id_classes_id_fk": {
+          "name": "entries_class_id_classes_id_fk",
+          "tableFrom": "entries",
+          "columnsFrom": [
+            "class_id"
+          ],
+          "tableTo": "classes",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "entries_rally_id_car_number_pk": {
+          "name": "entries_rally_id_car_number_pk",
+          "columns": [
+            "rally_id",
+            "car_number"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "entries_car_number_range": {
+          "name": "entries_car_number_range",
+          "value": "\"entries\".\"car_number\" BETWEEN 1 AND 999"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.legs": {
+      "name": "legs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "rally_id": {
+          "name": "rally_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "number": {
+          "name": "number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "legs_rally_id_rallies_id_fk": {
+          "name": "legs_rally_id_rallies_id_fk",
+          "tableFrom": "legs",
+          "columnsFrom": [
+            "rally_id"
+          ],
+          "tableTo": "rallies",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "legs_rally_id_number_unique": {
+          "name": "legs_rally_id_number_unique",
+          "columns": [
+            "rally_id",
+            "number"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "legs_number_positive": {
+          "name": "legs_number_positive",
+          "value": "\"legs\".\"number\" >= 1"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.rallies": {
+      "name": "rallies",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time_zone": {
+          "name": "time_zone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.records": {
+      "name": "records",
+      "schema": "",
+      "columns": {
+        "record_id": {
+          "name": "record_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "device_key_id": {
+          "name": "device_key_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "seq": {
+          "name": "seq",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prev_hash": {
+          "name": "prev_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hash": {
+          "name": "hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "signature": {
+          "name": "signature",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rally_id": {
+          "name": "rally_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "section_id": {
+          "name": "section_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stage_id": {
+          "name": "stage_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "control_id": {
+          "name": "control_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kind": {
+          "name": "kind",
+          "type": "record_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "point": {
+          "name": "point",
+          "type": "record_point",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "car_number": {
+          "name": "car_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "time_of_day_ms": {
+          "name": "time_of_day_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "elapsed_ms": {
+          "name": "elapsed_ms",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "precision": {
+          "name": "precision",
+          "type": "precision",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source": {
+          "name": "source",
+          "type": "source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_role": {
+          "name": "source_role",
+          "type": "source_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ref_record_id": {
+          "name": "ref_record_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "penalty_ms": {
+          "name": "penalty_ms",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "penalty_reason",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entered_at_ms": {
+          "name": "entered_at_ms",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "received_at": {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "records_rally_car_idx": {
+          "name": "records_rally_car_idx",
+          "columns": [
+            {
+              "expression": "rally_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "car_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "records_device_key_id_devices_key_id_fk": {
+          "name": "records_device_key_id_devices_key_id_fk",
+          "tableFrom": "records",
+          "columnsFrom": [
+            "device_key_id"
+          ],
+          "tableTo": "devices",
+          "columnsTo": [
+            "key_id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "records_rally_id_rallies_id_fk": {
+          "name": "records_rally_id_rallies_id_fk",
+          "tableFrom": "records",
+          "columnsFrom": [
+            "rally_id"
+          ],
+          "tableTo": "rallies",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "records_section_id_sections_id_fk": {
+          "name": "records_section_id_sections_id_fk",
+          "tableFrom": "records",
+          "columnsFrom": [
+            "section_id"
+          ],
+          "tableTo": "sections",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "records_stage_id_stages_id_fk": {
+          "name": "records_stage_id_stages_id_fk",
+          "tableFrom": "records",
+          "columnsFrom": [
+            "stage_id"
+          ],
+          "tableTo": "stages",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "records_control_id_controls_id_fk": {
+          "name": "records_control_id_controls_id_fk",
+          "tableFrom": "records",
+          "columnsFrom": [
+            "control_id"
+          ],
+          "tableTo": "controls",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "records_hash_unique": {
+          "name": "records_hash_unique",
+          "columns": [
+            "hash"
+          ],
+          "nullsNotDistinct": false
+        },
+        "records_device_key_id_seq_unique": {
+          "name": "records_device_key_id_seq_unique",
+          "columns": [
+            "device_key_id",
+            "seq"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "records_one_target": {
+          "name": "records_one_target",
+          "value": "(\"records\".\"stage_id\" IS NULL) <> (\"records\".\"control_id\" IS NULL)"
+        },
+        "records_chain_start": {
+          "name": "records_chain_start",
+          "value": "(\"records\".\"seq\" = 0) = (\"records\".\"prev_hash\" IS NULL)"
+        },
+        "records_hash_hex": {
+          "name": "records_hash_hex",
+          "value": "\"records\".\"hash\" ~ '^[0-9a-f]{64}$'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.sections": {
+      "name": "sections",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "leg_id": {
+          "name": "leg_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "number": {
+          "name": "number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "first_start_ms": {
+          "name": "first_start_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "sections_leg_id_legs_id_fk": {
+          "name": "sections_leg_id_legs_id_fk",
+          "tableFrom": "sections",
+          "columnsFrom": [
+            "leg_id"
+          ],
+          "tableTo": "legs",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "sections_leg_id_number_unique": {
+          "name": "sections_leg_id_number_unique",
+          "columns": [
+            "leg_id",
+            "number"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "sections_number_positive": {
+          "name": "sections_number_positive",
+          "value": "\"sections\".\"number\" >= 1"
+        },
+        "sections_first_start_in_day": {
+          "name": "sections_first_start_in_day",
+          "value": "\"sections\".\"first_start_ms\" >= 0 AND \"sections\".\"first_start_ms\" < 86400000"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.stages": {
+      "name": "stages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "section_id": {
+          "name": "section_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "number": {
+          "name": "number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "distance_km": {
+          "name": "distance_km",
+          "type": "numeric(6, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scoring": {
+          "name": "scoring",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "is_power_stage": {
+          "name": "is_power_stage",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_super_special": {
+          "name": "is_super_special",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "stages_section_id_sections_id_fk": {
+          "name": "stages_section_id_sections_id_fk",
+          "tableFrom": "stages",
+          "columnsFrom": [
+            "section_id"
+          ],
+          "tableTo": "sections",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "stages_section_id_position_unique": {
+          "name": "stages_section_id_position_unique",
+          "columns": [
+            "section_id",
+            "position"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "stages_distance_positive": {
+          "name": "stages_distance_positive",
+          "value": "\"stages\".\"distance_km\" > 0"
+        },
+        "stages_power_stage_scores": {
+          "name": "stages_power_stage_scores",
+          "value": "NOT \"stages\".\"is_power_stage\" OR \"stages\".\"scoring\""
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.control_kind": {
+      "name": "control_kind",
+      "schema": "public",
+      "values": [
+        "TC",
+        "SERVICE_IN",
+        "SERVICE_OUT",
+        "PARC_FERME_IN",
+        "PARC_FERME_OUT",
+        "REGROUP_IN",
+        "REGROUP_OUT",
+        "TECH_ZONE"
+      ]
+    },
+    "public.penalty_reason": {
+      "name": "penalty_reason",
+      "schema": "public",
+      "values": [
+        "TC_LATE",
+        "TC_EARLY",
+        "FALSE_START",
+        "LATE_START",
+        "CHICANE",
+        "ROUTE",
+        "RESTART",
+        "ENGINE_CHANGE",
+        "OTHER"
+      ]
+    },
+    "public.record_point": {
+      "name": "record_point",
+      "schema": "public",
+      "values": [
+        "START",
+        "FINISH",
+        "SPLIT",
+        "STOP",
+        "TC"
+      ]
+    },
+    "public.precision": {
+      "name": "precision",
+      "schema": "public",
+      "values": [
+        "MIN",
+        "S",
+        "DS",
+        "CS",
+        "MS"
+      ]
+    },
+    "public.record_kind": {
+      "name": "record_kind",
+      "schema": "public",
+      "values": [
+        "TIME",
+        "PENALTY",
+        "STATUS",
+        "VOID"
+      ]
+    },
+    "public.source": {
+      "name": "source",
+      "schema": "public",
+      "values": [
+        "PHOTOCELL_PRINTER",
+        "STOPWATCH",
+        "CLOCK",
+        "TRANSPONDER",
+        "OTHER"
+      ]
+    },
+    "public.source_role": {
+      "name": "source_role",
+      "schema": "public",
+      "values": [
+        "PRIMARY",
+        "BACKUP"
+      ]
+    },
+    "public.status": {
+      "name": "status",
+      "schema": "public",
+      "values": [
+        "DNS",
+        "RET",
+        "RET_FINAL",
+        "RESTART",
+        "DSQ",
+        "NOTIONAL"
+      ]
+    }
+  },
+  "schemas": {},
+  "views": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

@@ -1,4 +1,4 @@
-import { count, eq } from "drizzle-orm";
+import { count, eq, sql } from "drizzle-orm";
 import {
   afterAll,
   afterEach,
@@ -87,6 +87,18 @@ function finish(carNumber: number, point: "FINISH" | "START" = "FINISH") {
     reason: null,
   };
   return fields;
+}
+
+/**
+ * What a restore from an older backup does to the server. Records are
+ * append-only, so the trigger that guards them is bypassed for this
+ * transaction only, as a restore would.
+ */
+async function loseServerRecords(key: DeviceKey): Promise<void> {
+  await getDb().transaction(async (tx) => {
+    await tx.execute(sql`set local session_replication_role = replica`);
+    await tx.delete(records).where(eq(records.deviceKeyId, key.keyId));
+  });
 }
 
 async function storedOnServer(key: DeviceKey): Promise<number> {
@@ -199,7 +211,7 @@ describe("drain", () => {
     const { db, key } = await authorizedPhone();
     for (let car = 1; car <= 2; car++) await enterRecord(db, key, finish(car));
     await drain(db, key, { post: server });
-    await getDb().delete(records).where(eq(records.deviceKeyId, key.keyId));
+    await loseServerRecords(key);
 
     await enterRecord(db, key, finish(3));
     await drain(db, key, { post: server });
