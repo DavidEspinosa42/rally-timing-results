@@ -34,7 +34,8 @@ configurator mode (ADR 7).
   lockfile is the guarantee, since `npm ci` installs only what it lists, and
   a registry cache that holds only versions that old can serve it. npm 11's
   rolling `min-release-age` was not adopted, to stay on npm 10. 7 days, not
-  30, keeps security releases in reach.
+  30, keeps security releases in reach: at 30 the Next.js 16.4.6 fix would
+  have been blocked.
 - CI installs with `npm ci`, from the lockfile only.
 
 ## Consequences

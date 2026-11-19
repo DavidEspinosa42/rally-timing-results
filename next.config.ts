@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   typedRoutes: true,
+  experimental: {
+    // `next dev` and `next build` remind about Next.js security releases
+    // only; `next upgrade --agent` uses the same policy.
+    agentUpgrade: "security",
+  },
   // The entry screen is the only screen.
   async redirects() {
     return [{ source: "/", destination: "/entry", permanent: false }];
