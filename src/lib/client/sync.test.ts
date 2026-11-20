@@ -55,17 +55,17 @@ afterAll(async () => {
 });
 
 /** A phone set up for the dummy rally and authorized for SS1 FINISH. */
-async function authorizedPhone(): Promise<{ db: LocalDb; key: DeviceKey }> {
+async function authorizedPhone(): Promise<{ db: LocalDb; device: DeviceKey }> {
   const db = openLocalDb(newBrowserProfile());
-  const key = await getOrCreateDeviceKey(db, DUMMY_RALLY_ID);
+  const device = await getOrCreateDeviceKey(db, DUMMY_RALLY_ID);
   const result = await authorizeDevice(getDb(), {
-    publicKey: key.publicKeyHex,
+    publicKey: device.publicKeyHex,
     target: { kind: "stage", number: 1 },
     point: "FINISH",
     rallyId: null,
   });
   if (!result.ok) throw new Error(result.error);
-  return { db, key };
+  return { db, device };
 }
 
 function finish(carNumber: number, point: "FINISH" | "START" = "FINISH") {
@@ -94,18 +94,18 @@ function finish(carNumber: number, point: "FINISH" | "START" = "FINISH") {
  * append-only, so the trigger that guards them is bypassed for this
  * transaction only, as a restore would.
  */
-async function loseServerRecords(key: DeviceKey): Promise<void> {
+async function loseServerRecords(device: DeviceKey): Promise<void> {
   await getDb().transaction(async (tx) => {
     await tx.execute(sql`set local session_replication_role = replica`);
-    await tx.delete(records).where(eq(records.deviceKeyId, key.keyId));
+    await tx.delete(records).where(eq(records.deviceKeyId, device.keyId));
   });
 }
 
-async function storedOnServer(key: DeviceKey): Promise<number> {
+async function storedOnServer(device: DeviceKey): Promise<number> {
   const [row] = await getDb()
     .select({ n: count() })
     .from(records)
-    .where(eq(records.deviceKeyId, key.keyId));
+    .where(eq(records.deviceKeyId, device.keyId));
   return row?.n ?? 0;
 }
 
@@ -116,22 +116,25 @@ beforeEach(() => {
 
 describe("drain", () => {
   it("sends the outbox, and the server stores what the phone signed", async () => {
-    const { db, key } = await authorizedPhone();
-    for (let car = 1; car <= 3; car++) await enterRecord(db, key, finish(car));
+    const { db, device } = await authorizedPhone();
+    for (let car = 1; car <= 3; car++)
+      await enterRecord(db, device, finish(car));
 
-    expect(await pendingCount(db, key)).toBe(3);
-    expect(await drain(db, key, { post: server })).toEqual({
+    expect(await pendingCount(db, device)).toBe(3);
+    expect(await drain(db, device, { post: server })).toEqual({
       online: true,
       pending: 0,
       problem: null,
     });
-    expect(await storedOnServer(key)).toBe(3);
-    expect(await db.syncState.get(key.keyId)).toMatchObject({ syncedSeq: 2 });
+    expect(await storedOnServer(device)).toBe(3);
+    expect(await db.syncState.get(device.keyId)).toMatchObject({
+      syncedSeq: 2,
+    });
   });
 
   it("sends nothing when nothing is pending, and so learns nothing", async () => {
-    const { db, key } = await authorizedPhone();
-    expect(await drain(db, key, { post: server })).toEqual({
+    const { db, device } = await authorizedPhone();
+    expect(await drain(db, device, { post: server })).toEqual({
       online: null,
       pending: 0,
       problem: null,
@@ -140,59 +143,62 @@ describe("drain", () => {
   });
 
   it("is offline when the request fails, and sends the same records later", async () => {
-    const { db, key } = await authorizedPhone();
-    await enterRecord(db, key, finish(1));
-    await enterRecord(db, key, finish(2));
+    const { db, device } = await authorizedPhone();
+    await enterRecord(db, device, finish(1));
+    await enterRecord(db, device, finish(2));
 
-    expect(await drain(db, key, { post: offline })).toEqual({
+    expect(await drain(db, device, { post: offline })).toEqual({
       online: false,
       pending: 2,
       problem: null,
     });
-    expect(await drain(db, key, { post: server })).toMatchObject({
+    expect(await drain(db, device, { post: server })).toMatchObject({
       online: true,
       pending: 0,
     });
-    expect(await storedOnServer(key)).toBe(2);
+    expect(await storedOnServer(device)).toBe(2);
   });
 
   it("is offline when the server answers with an error", async () => {
-    const { db, key } = await authorizedPhone();
-    await enterRecord(db, key, finish(1));
+    const { db, device } = await authorizedPhone();
+    await enterRecord(db, device, finish(1));
     const failing = vi.fn(async () => new Response("down", { status: 503 }));
-    expect(await drain(db, key, { post: failing })).toMatchObject({
+    expect(await drain(db, device, { post: failing })).toMatchObject({
       online: false,
       pending: 1,
     });
   });
 
   it("sends a long outbox in batches, in chain order", async () => {
-    const { db, key } = await authorizedPhone();
-    for (let car = 1; car <= 5; car++) await enterRecord(db, key, finish(car));
-    expect(await drain(db, key, { post: server, batchSize: 2 })).toMatchObject({
+    const { db, device } = await authorizedPhone();
+    for (let car = 1; car <= 5; car++)
+      await enterRecord(db, device, finish(car));
+    expect(
+      await drain(db, device, { post: server, batchSize: 2 }),
+    ).toMatchObject({
       pending: 0,
     });
     expect(server).toHaveBeenCalledTimes(3);
-    expect(await storedOnServer(key)).toBe(5);
+    expect(await storedOnServer(device)).toBe(5);
   });
 
   it("keeps a refused record pending, says why, and stores what came before", async () => {
-    const { db, key } = await authorizedPhone();
-    await enterRecord(db, key, finish(1));
-    const refused = await enterRecord(db, key, finish(2, "START"));
-    await enterRecord(db, key, finish(3));
+    const { db, device } = await authorizedPhone();
+    await enterRecord(db, device, finish(1));
+    const refused = await enterRecord(db, device, finish(2, "START"));
+    await enterRecord(db, device, finish(3));
 
-    expect(await drain(db, key, { post: server })).toEqual({
+    expect(await drain(db, device, { post: server })).toEqual({
       online: true,
       pending: 2,
       problem: { reason: "not-authorized", recordId: refused.record.recordId },
     });
-    expect(await storedOnServer(key)).toBe(1);
+    expect(await storedOnServer(device)).toBe(1);
   });
 
   it("does not move past a server head that is not this phone's record", async () => {
-    const { db, key } = await authorizedPhone();
-    await enterRecord(db, key, finish(1));
+    const { db, device } = await authorizedPhone();
+    await enterRecord(db, device, finish(1));
     const liar = vi.fn(async () =>
       Response.json({
         accepted: 1,
@@ -200,7 +206,7 @@ describe("drain", () => {
         rejected: null,
       }),
     );
-    expect(await drain(db, key, { post: liar })).toEqual({
+    expect(await drain(db, device, { post: liar })).toEqual({
       online: true,
       pending: 1,
       problem: { reason: "server-chain-differs", recordId: null },
@@ -208,17 +214,18 @@ describe("drain", () => {
   });
 
   it("follows the server's head, so records the server lost are sent again", async () => {
-    const { db, key } = await authorizedPhone();
-    for (let car = 1; car <= 2; car++) await enterRecord(db, key, finish(car));
-    await drain(db, key, { post: server });
-    await loseServerRecords(key);
+    const { db, device } = await authorizedPhone();
+    for (let car = 1; car <= 2; car++)
+      await enterRecord(db, device, finish(car));
+    await drain(db, device, { post: server });
+    await loseServerRecords(device);
 
-    await enterRecord(db, key, finish(3));
-    await drain(db, key, { post: server });
+    await enterRecord(db, device, finish(3));
+    await drain(db, device, { post: server });
     // The server, empty for this key, answered with no head: the phone sent
     // from the start of its chain on the next pass.
-    await drain(db, key, { post: server });
-    expect(await storedOnServer(key)).toBe(3);
+    await drain(db, device, { post: server });
+    expect(await storedOnServer(device)).toBe(3);
   });
 });
 

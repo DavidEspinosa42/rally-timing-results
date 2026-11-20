@@ -17,7 +17,7 @@ export async function startTestDatabase(): Promise<() => Promise<void>> {
     maxConnections: 8,
   });
   await server.start();
-  process.env.DATABASE_URL = `postgresql://postgres:postgres@${server.getServerConn()}/postgres`;
+  process.env.DATABASE_URL = `postgresql://postgres@${server.getServerConn()}/postgres`;
   await migrate(getDb(), { migrationsFolder: "./drizzle" });
 
   return async () => {

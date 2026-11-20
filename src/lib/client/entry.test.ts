@@ -62,17 +62,17 @@ async function storedChain(db: LocalDb, keyId: string) {
 describe("enterRecord", () => {
   it("starts the chain, fills in identity and audit time, and signs", async () => {
     const db = open();
-    const key = await getOrCreateDeviceKey(db, IDS.rally);
+    const device = await getOrCreateDeviceKey(db, IDS.rally);
     const { record, stored } = await enterRecord(
       db,
-      key,
+      device,
       finish(8),
       () => 1_790_000_000_000,
     );
 
     expect(record).toMatchObject({
       schema: "rally-timing-results/record/v1",
-      deviceKeyId: key.keyId,
+      deviceKeyId: device.keyId,
       rallyId: IDS.rally,
       seq: 0,
       prevHash: null,
@@ -80,7 +80,7 @@ describe("enterRecord", () => {
       carNumber: 8,
     });
     expect(await db.records.get(record.recordId)).toEqual(stored);
-    expect(await verifyRecord(stored, key.publicKey)).toEqual({
+    expect(await verifyRecord(stored, device.publicKey)).toEqual({
       ok: true,
       record,
       hash: stored.hash,
@@ -89,13 +89,13 @@ describe("enterRecord", () => {
 
   it("links each entry to the one before it", async () => {
     const db = open();
-    const key = await getOrCreateDeviceKey(db, IDS.rally);
+    const device = await getOrCreateDeviceKey(db, IDS.rally);
     const entries = [];
     for (let car = 1; car <= 5; car++) {
-      entries.push(await enterRecord(db, key, finish(car)));
+      entries.push(await enterRecord(db, device, finish(car)));
     }
     const last = entries.at(-1);
-    expect(verifyChain(await storedChain(db, key.keyId))).toEqual({
+    expect(verifyChain(await storedChain(db, device.keyId))).toEqual({
       ok: true,
       head: { seq: 4, hash: last?.stored.hash },
     });
@@ -103,38 +103,40 @@ describe("enterRecord", () => {
 
   it("gives entries made at the same moment distinct, linked positions", async () => {
     const db = open();
-    const key = await getOrCreateDeviceKey(db, IDS.rally);
+    const device = await getOrCreateDeviceKey(db, IDS.rally);
     const entries = await Promise.all(
-      Array.from({ length: 10 }, (_, i) => enterRecord(db, key, finish(i + 1))),
+      Array.from({ length: 10 }, (_, i) =>
+        enterRecord(db, device, finish(i + 1)),
+      ),
     );
     expect(
       entries.map(({ record }) => record.seq).sort((a, b) => a - b),
     ).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    expect(verifyChain(await storedChain(db, key.keyId)).ok).toBe(true);
+    expect(verifyChain(await storedChain(db, device.keyId)).ok).toBe(true);
   });
 
   it("saves nothing and uses no seq when the entry is invalid", async () => {
     const db = open();
-    const key = await getOrCreateDeviceKey(db, IDS.rally);
-    await expect(enterRecord(db, key, finish(0))).rejects.toThrow();
+    const device = await getOrCreateDeviceKey(db, IDS.rally);
+    await expect(enterRecord(db, device, finish(0))).rejects.toThrow();
     await expect(
-      enterRecord(db, key, { ...finish(8), precision: "MIN" }),
+      enterRecord(db, device, { ...finish(8), precision: "MIN" }),
     ).rejects.toThrow();
     expect(await db.records.count()).toBe(0);
-    const { record } = await enterRecord(db, key, finish(8));
+    const { record } = await enterRecord(db, device, finish(8));
     expect(record.seq).toBe(0);
   });
 
   it("continues the chain after the app is reopened", async () => {
     const profile = newBrowserProfile();
     const before = open(profile);
-    const key = await getOrCreateDeviceKey(before, IDS.rally);
-    await enterRecord(before, key, finish(1));
-    const second = await enterRecord(before, key, finish(2));
+    const device = await getOrCreateDeviceKey(before, IDS.rally);
+    await enterRecord(before, device, finish(1));
+    const second = await enterRecord(before, device, finish(2));
     before.close();
 
     const after = open(profile);
-    const { record } = await enterRecord(after, key, finish(3));
+    const { record } = await enterRecord(after, device, finish(3));
     expect(record).toMatchObject({ seq: 2, prevHash: second.stored.hash });
   });
 
@@ -149,8 +151,8 @@ describe("enterRecord", () => {
 
   it("records a penalty at a time control", async () => {
     const db = open();
-    const key = await getOrCreateDeviceKey(db, IDS.rally);
-    const { record } = await enterRecord(db, key, {
+    const device = await getOrCreateDeviceKey(db, IDS.rally);
+    const { record } = await enterRecord(db, device, {
       ...finish(8),
       stageId: null,
       controlId: IDS.control,
@@ -170,8 +172,8 @@ describe("enterRecord", () => {
   it("never touches the network", async () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch");
     const db = open();
-    const key = await getOrCreateDeviceKey(db, IDS.rally);
-    await enterRecord(db, key, finish(8));
+    const device = await getOrCreateDeviceKey(db, IDS.rally);
+    await enterRecord(db, device, finish(8));
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
@@ -179,11 +181,11 @@ describe("enterRecord", () => {
 describe("latestEntries", () => {
   it("returns the newest entries first, read from their signed payload", async () => {
     const db = open();
-    const key = await getOrCreateDeviceKey(db, IDS.rally);
+    const device = await getOrCreateDeviceKey(db, IDS.rally);
     for (let car = 1; car <= 4; car++) {
-      await enterRecord(db, key, finish(car));
+      await enterRecord(db, device, finish(car));
     }
-    const latest = await latestEntries(db, key, 3);
+    const latest = await latestEntries(db, device, 3);
     expect(latest.map(({ record }) => record.carNumber)).toEqual([4, 3, 2]);
     expect(latest.map(({ record }) => record.seq)).toEqual([3, 2, 1]);
   });
